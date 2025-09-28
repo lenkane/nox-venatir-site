@@ -1,0 +1,184 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOX VENATIR - Fiche RH</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Orbitron', sans-serif; }
+    .bg-members { background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('images/banner.gif'); background-size: cover; background-position: center; }
+  </style>
+</head>
+<body class="bg-black text-white">
+  <!-- Navigation -->
+  <nav class="bg-gray-900/95 backdrop-blur-md text-white p-4 sticky top-0 z-20 border-b border-red-600/50">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-red-600">NOX VENATIR - Espace Membre</h1>
+      <ul class="flex space-x-6">
+        <li><a href="members-home.html" class="hover:text-red-500 transition">Accueil</a></li>
+        <li><a href="members-logbook.html" class="hover:text-red-500 transition">Journal de bord</a></li>
+        <li><a href="members-hr.html" class="hover:text-red-500 transition">Fiche RH</a></li>
+        <li><a href="members-missions.html" class="hover:text-red-500 transition">Missions</a></li>
+        <li><a href="members-tactics.html" class="hover:text-red-500 transition">Tactique NOX</a></li>
+        <li><button id="logout" class="bg-red-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-500">Déconnexion</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- HR Section -->
+  <section class="bg-members py-20">
+    <div class="container mx-auto">
+      <h2 class="text-4xl font-bold text-center mb-12 text-white">Fiche RH NOX VENATIR</h2>
+      <div class="max-w-4xl mx-auto">
+        <div class="bg-gray-800 p-8 rounded-lg mb-8" id="addMemberSection">
+          <h3 class="text-2xl font-semibold mb-4 text-red-600">Ajouter un Membre</h3>
+          <input type="text" id="newMemberName" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-4 text-white" placeholder="Nom du membre (ex. ShadowHunter)">
+          <input type="text" id="newMemberVideo" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-4 text-white" placeholder="Chemin de la vidéo (ex. images/ShadowHunter.mp4)">
+          <button id="addMember" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Ajouter</button>
+        </div>
+        <div class="bg-gray-800 p-8 rounded-lg">
+          <h3 class="text-2xl font-semibold mb-4 text-red-600">Liste des Membres</h3>
+          <div id="memberList" class="space-y-4">
+            <!-- Members will be dynamically added here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-400 py-6 border-t border-red-600/50">
+    <div class="container mx-auto text-center">
+      <p>&copy; 2955 NOX VENATIR. Tous droits réservés. Hunt the stars, citizen.</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    // Check if user is logged in
+    if (!localStorage.getItem('isLoggedIn')) {
+      window.location.href = 'login.html';
+    }
+
+    // Logout
+    document.getElementById('logout').addEventListener('click', function() {
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('isAdmin');
+      window.location.href = 'index.html';
+    });
+
+    // Check admin status
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    const addMemberSection = document.getElementById('addMemberSection');
+
+    // Hide add member section for non-admins
+    if (!isAdmin) {
+      addMemberSection.style.display = 'none';
+    }
+
+    // HR functionality
+    const newMemberName = document.getElementById('newMemberName');
+    const newMemberVideo = document.getElementById('newMemberVideo');
+    const memberList = document.getElementById('memberList');
+    const addMember = document.getElementById('addMember');
+
+    // Load existing members from localStorage
+    let members = JSON.parse(localStorage.getItem('noxMembers')) || [];
+
+    // Display members
+    function displayMembers() {
+      memberList.innerHTML = '';
+      members.forEach((member, index) => {
+        const memberDiv = document.createElement('div');
+        memberDiv.className = 'bg-gray-700 p-4 rounded-lg flex justify-between items-center';
+        memberDiv.innerHTML = `
+          <a href="members-hr-detail.html?id=${index}" class="text-red-500 hover:underline text-xl font-semibold">${member.name}</a>
+          <button class="deleteMember bg-red-600 text-white px-3 py-1 rounded-full text-sm hover:bg-red-500" data-index="${index}" ${!isAdmin ? 'style="display:none;"' : ''}>Supprimer</button>
+        `;
+        memberList.appendChild(memberDiv);
+      });
+
+      // Add event listeners to delete buttons
+      document.querySelectorAll('.deleteMember').forEach(button => {
+        button.addEventListener('click', function() {
+          const index = this.dataset.index;
+          if (confirm('Supprimer ce membre ?')) {
+            members.splice(index, 1);
+            localStorage.setItem('noxMembers', JSON.stringify(members));
+            displayMembers();
+          }
+        });
+      });
+    }
+
+    // Add new member
+    if (isAdmin) {
+      addMember.addEventListener('click', function() {
+        if (newMemberName.value.trim() && newMemberVideo.value.trim()) {
+          members.push({
+            name: newMemberName.value.trim(),
+            video: newMemberVideo.value.trim(),
+            race: '',
+            age: '',
+            origin: '',
+            role: '',
+            missionCount: 0,
+            miscInfo: '',
+            decorations: ''
+          });
+          localStorage.setItem('noxMembers', JSON.stringify(members));
+          newMemberName.value = '';
+          newMemberVideo.value = '';
+          displayMembers();
+        } else {
+          alert('Veuillez saisir un nom et un chemin de vidéo.');
+        }
+      });
+    }
+
+    // Initial display
+    displayMembers();
+  </script>
+</body>
+</html>

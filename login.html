@@ -1,0 +1,271 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOX VENATIR - Connexion Membre</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Orbitron', sans-serif; }
+    .login-bg {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .login-bg::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 1;
+      pointer-events: none; /* Empêche l'overlay de bloquer les clics */
+    }
+    .login-bg video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+    .login-container {
+      text-align: center;
+      z-index: 20; /* Augmenté pour être au-dessus de tout */
+    }
+    .scan-button {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      margin: 0 auto;
+      background: #1a1a1a;
+      border: 2px solid #ff0000;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      z-index: 20;
+      pointer-events: auto;
+    }
+    .scan-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+    }
+    .scan-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100px;
+      height: 2px;
+      background: #ff0000;
+      animation: scan 3s infinite linear;
+    }
+    .scan-button span {
+      color: #ff0000;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    @keyframes scan {
+      0% { top: 0; opacity: 0.7; }
+      50% { top: 100%; opacity: 0.3; }
+      100% { top: 0; opacity: 0.7; }
+    }
+    .login-form {
+      display: none;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      margin-top: 20px;
+      z-index: 20;
+      background: #2a2a2a;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0);
+      pointer-events: auto;
+    }
+    .login-form.show {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .login-form input {
+      cursor: text;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      pointer-events: auto;
+    }
+    .login-form input:focus {
+      border-color: #ff0000;
+      outline: none;
+      box-shadow: 0 0 10px rgba(255, 0, 0, 0);
+    }
+    .login-form button, .login-form a {
+      cursor: pointer;
+      transition: transform 0.3s ease, background 0.3s ease;
+      pointer-events: auto;
+    }
+    .login-form button:hover, .login-form a:hover {
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+<body class="bg-black text-white">
+  <!-- Navigation -->
+  <nav class="bg-gray-900/95 backdrop-blur-md text-white p-4 sticky top-0 z-20 border-b border-red-600/50">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-red-600">NOX VENATIR - Connexion</h1>
+      <a href="index.html" class="bg-red-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-500">Retour</a>
+    </div>
+  </nav>
+
+  <!-- Login Section -->
+  <section class="login-bg">
+    <video autoplay muted loop playsinline id="loginVideo">
+      <source src="images/login-bg.mp4" type="video/mp4">
+    </video>
+    <div class="container mx-auto">
+      <div class="login-container">
+        <div class="scan-button" id="scanButton">
+          <span>Scanner</span>
+        </div>
+        <div class="login-form" id="loginForm">
+          <h2 class="text-2xl font-bold mb-4 text-red-600">Connexion Membre</h2>
+          <div class="mb-4">
+            <label for="username" class="block text-gray-300 font-semibold mb-2">Nom d'utilisateur</label>
+            <input type="text" id="username" class="w-full max-w-md mx-auto p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="Votre nom d'utilisateur">
+          </div>
+          <div class="mb-4">
+            <label for="password" class="block text-gray-300 font-semibold mb-2">Mot de passe</label>
+            <input type="password" id="password" class="w-full max-w-md mx-auto p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="Votre mot de passe">
+          </div>
+          <div class="flex justify-center space-x-4">
+            <button id="loginSubmit" class="bg-red-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-500">Connexion</button>
+            <a href="index.html" class="bg-gray-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-gray-500">Annuler</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-400 py-6 border-t border-red-600/50">
+    <div class="container mx-auto text-center">
+      <p>&copy; 2955 NOX VENATIR. Tous droits réservés. Hunt the stars, citizen.</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    // Authentication credentials
+    const users = [
+      { username: 'admin', password: 'hunter2955', isAdmin: true },
+      { username: 'member1', password: 'password1', isAdmin: false },
+      { username: 'member2', password: 'password2', isAdmin: false }
+    ];
+
+    // Ensure DOM is loaded before attaching event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+      const scanButton = document.getElementById('scanButton');
+      const loginForm = document.getElementById('loginForm');
+      const loginSubmit = document.getElementById('loginSubmit');
+      const usernameInput = document.getElementById('username');
+      const passwordInput = document.getElementById('password');
+
+      if (!scanButton || !loginForm || !loginSubmit || !usernameInput || !passwordInput) {
+        console.error('Erreur : un ou plusieurs éléments DOM manquants (scanButton, loginForm, loginSubmit, username, password)');
+        return;
+      }
+
+      // Show login form on scan button click
+      scanButton.addEventListener('click', function() {
+        console.log('Scan button clicked');
+        loginForm.classList.add('show');
+        scanButton.style.display = 'none';
+      });
+
+      // Debug mouseover and clicks
+      usernameInput.addEventListener('mouseover', function() {
+        console.log('Mouseover on username input');
+      });
+      usernameInput.addEventListener('click', function() {
+        console.log('Username input clicked');
+      });
+      passwordInput.addEventListener('mouseover', function() {
+        console.log('Mouseover on password input');
+      });
+      passwordInput.addEventListener('click', function() {
+        console.log('Password input clicked');
+      });
+      loginSubmit.addEventListener('mouseover', function() {
+        console.log('Mouseover on login button');
+      });
+      loginSubmit.addEventListener('click', function() {
+        console.log('Login button clicked');
+        const username = usernameInput.value;
+        const password = passwordInput.value;
+
+        const user = users.find(u => u.username === username && u.password === password);
+        if (user) {
+          localStorage.setItem('isLoggedIn', 'true');
+          localStorage.setItem('isAdmin', user.isAdmin.toString());
+          usernameInput.value = '';
+          passwordInput.value = '';
+          window.location.href = 'members-home.html';
+        } else {
+          alert('Nom d\'utilisateur ou mot de passe incorrect.');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

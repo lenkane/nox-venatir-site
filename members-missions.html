@@ -1,0 +1,204 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NOX VENATIR - Missions</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Orbitron', sans-serif; }
+    .bg-members { background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('images/banner.gif'); background-size: cover; background-position: center; }
+  </style>
+</head>
+<body class="bg-black text-white">
+  <!-- Navigation -->
+  <nav class="bg-gray-900/95 backdrop-blur-md text-white p-4 sticky top-0 z-20 border-b border-red-600/50">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-red-600">NOX VENATIR - Espace Membre</h1>
+      <ul class="flex space-x-6">
+        <li><a href="members-home.html" class="hover:text-red-500 transition">Accueil</a></li>
+        <li><a href="members-logbook.html" class="hover:text-red-500 transition">Journal de bord</a></li>
+        <li><a href="members-hr.html" class="hover:text-red-500 transition">Fiche RH</a></li>
+        <li><a href="members-missions.html" class="hover:text-red-500 transition">Missions</a></li>
+        <li><a href="members-tactics.html" class="hover:text-red-500 transition">Tactique NOX</a></li>
+        <li><button id="logout" class="bg-red-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-500">Déconnexion</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Missions Section -->
+  <section class="bg-members py-20">
+    <div class="container mx-auto">
+      <h2 class="text-4xl font-bold text-center mb-12 text-white">Missions NOX VENATIR</h2>
+      <div class="max-w-2xl mx-auto">
+        <div class="bg-gray-800 p-8 rounded-lg mb-8">
+          <h3 class="text-2xl font-semibold mb-4 text-red-600">Nouvelle Mission</h3>
+          <input type="text" id="missionName" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-4 text-white" placeholder="Nom de la mission">
+          <div id="participantCheckboxes" class="space-y-2 mb-4">
+            <!-- Checkboxes will be dynamically added here -->
+          </div>
+          <textarea id="missionReport" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-4 text-white" rows="5" placeholder="Rapport de la mission"></textarea>
+          <button id="submitMission" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Ajouter la Mission</button>
+        </div>
+        <div id="missionList" class="space-y-4">
+          <!-- Missions will be dynamically added here -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-400 py-6 border-t border-red-600/50">
+    <div class="container mx-auto text-center">
+      <p>&copy; 2955 NOX VENATIR. Tous droits réservés. Hunt the stars, citizen.</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript -->
+  <script>
+    // Check if user is logged in
+    if (!localStorage.getItem('isLoggedIn')) {
+      window.location.href = 'login.html';
+    }
+
+    // Logout
+    document.getElementById('logout').addEventListener('click', function() {
+      localStorage.removeItem('isLoggedIn');
+      localStorage.removeItem('isAdmin');
+      window.location.href = 'index.html';
+    });
+
+    // Check admin status
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+
+    // Missions functionality
+    const missionName = document.getElementById('missionName');
+    const participantCheckboxes = document.getElementById('participantCheckboxes');
+    const missionReport = document.getElementById('missionReport');
+    const missionList = document.getElementById('missionList');
+    const submitMission = document.getElementById('submitMission');
+
+    // Load members from localStorage for participants
+    let members = JSON.parse(localStorage.getItem('noxMembers')) || [];
+
+    // Populate participant checkboxes
+    members.forEach((member, index) => {
+      const label = document.createElement('label');
+      label.className = 'flex items-center space-x-2 text-gray-300';
+      label.innerHTML = `
+        <input type="checkbox" value="${index}" class="form-checkbox h-5 w-5 text-red-600 bg-gray-700 border-red-600/50">
+        <span>${member.name}</span>
+      `;
+      participantCheckboxes.appendChild(label);
+    });
+
+    // Load existing missions from localStorage
+    let missions = JSON.parse(localStorage.getItem('noxMissions')) || [];
+
+    // Display missions
+    function displayMissions() {
+      missionList.innerHTML = '';
+      missions.forEach((mission, index) => {
+        const missionDiv = document.createElement('div');
+        missionDiv.className = 'bg-gray-800 p-4 rounded-lg flex justify-between items-start';
+        missionDiv.innerHTML = `
+          <div>
+            <h4 class="text-xl font-semibold text-red-600">${mission.name}</h4>
+            <p class="text-gray-400 mb-2">Participants: ${mission.participants.map(i => members[i].name).join(', ')}</p>
+            <p class="text-gray-300">${mission.report}</p>
+          </div>
+          <button class="deleteMission bg-red-600 text-white px-3 py-1 rounded-full text-sm hover:bg-red-500" data-index="${index}" ${!isAdmin ? 'style="display:none;"' : ''}>Supprimer</button>
+        `;
+        missionList.appendChild(missionDiv);
+      });
+
+      // Add event listeners to delete buttons
+      document.querySelectorAll('.deleteMission').forEach(button => {
+        button.addEventListener('click', function() {
+          const index = this.dataset.index;
+          if (confirm('Supprimer cette mission ?')) {
+            // Decrement mission count for participants
+            missions[index].participants.forEach(participantIndex => {
+              members[participantIndex].missionCount = (members[participantIndex].missionCount || 0) - 1;
+            });
+            localStorage.setItem('noxMembers', JSON.stringify(members));
+
+            missions.splice(index, 1);
+            localStorage.setItem('noxMissions', JSON.stringify(missions));
+            displayMissions();
+          }
+        });
+      });
+    }
+
+    // Add new mission
+    submitMission.addEventListener('click', function() {
+      const selectedParticipants = Array.from(participantCheckboxes.querySelectorAll('input:checked')).map(checkbox => parseInt(checkbox.value));
+      if (missionName.value.trim() && selectedParticipants.length > 0 && missionReport.value.trim()) {
+        missions.push({
+          name: missionName.value.trim(),
+          participants: selectedParticipants,
+          report: missionReport.value.trim()
+        });
+        localStorage.setItem('noxMissions', JSON.stringify(missions));
+
+        // Update member mission counts
+        selectedParticipants.forEach(index => {
+          members[index].missionCount = (members[index].missionCount || 0) + 1;
+        });
+        localStorage.setItem('noxMembers', JSON.stringify(members));
+
+        missionName.value = '';
+        missionReport.value = '';
+        participantCheckboxes.querySelectorAll('input:checked').forEach(checkbox => checkbox.checked = false);
+        displayMissions();
+      } else {
+        alert('Veuillez remplir tous les champs.');
+      }
+    });
+
+    // Initial display
+    displayMissions();
+  </script>
+</body>
+</html>
