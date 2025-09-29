@@ -120,6 +120,16 @@
       });
     });
 
+    document.getElementById('logout').addEventListener('click', () => {
+      signOut(auth).then(() => {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('isAdmin');
+        window.location.href = 'index.html';
+      }).catch(error => {
+        console.error('Erreur lors de la déconnexion :', error);
+      });
+    });
+
     async function initializePage() {
       console.log('Initialisation de la page...');
       const isAdmin = localStorage.getItem('isAdmin') === 'true';
@@ -189,16 +199,26 @@
             if (confirm('Supprimer cette mission ?')) {
               try {
                 const missionDoc = await getDoc(doc(db, 'missions', id));
+                if (!missionDoc.exists()) {
+                  console.error('Mission non trouvée :', id);
+                  return;
+                }
                 const mission = missionDoc.data();
                 for (const participantId of mission.participants) {
                   const memberRef = doc(db, 'members', participantId);
                   const memberDoc = await getDoc(memberRef);
-                  const member = memberDoc.data();
-                  await updateDoc(memberRef, {
-                    missionCount: (member.missionCount || 0) - 1
-                  });
+                  if (memberDoc.exists()) {
+                    const member = memberDoc.data();
+                    console.log(`Décrémentation de missionCount pour ${participantId}: ${member.missionCount}`);
+                    await updateDoc(memberRef, {
+                      missionCount: (member.missionCount || 0) - 1
+                    });
+                  } else {
+                    console.warn(`Membre ${participantId} non trouvé`);
+                  }
                 }
                 await deleteDoc(doc(db, 'missions', id));
+                console.log('Mission supprimée :', id);
                 displayMissions();
               } catch (error) {
                 console.error('Erreur lors de la suppression de la mission :', error);
@@ -214,18 +234,24 @@
         const selectedParticipants = Array.from(participantCheckboxes.querySelectorAll('input:checked')).map(checkbox => checkbox.value);
         if (missionName.value.trim() && selectedParticipants.length > 0 && missionReport.value.trim()) {
           try {
-            await addDoc(collection(db, 'missions'), {
+            const missionRef = await addDoc(collection(db, 'missions'), {
               name: missionName.value.trim(),
               participants: selectedParticipants,
               report: missionReport.value.trim()
             });
+            console.log('Mission ajoutée :', missionRef.id);
             for (const participantId of selectedParticipants) {
               const memberRef = doc(db, 'members', participantId);
               const memberDoc = await getDoc(memberRef);
-              const member = memberDoc.data();
-              await updateDoc(memberRef, {
-                missionCount: (member.missionCount || 0) + 1
-              });
+              if (memberDoc.exists()) {
+                const member = memberDoc.data();
+                console.log(`Incrémentation de missionCount pour ${participantId}: ${member.missionCount}`);
+                await updateDoc(memberRef, {
+                  missionCount: (member.missionCount || 0) + 1
+                });
+              } else {
+                console.warn(`Membre ${participantId} non trouvé`);
+              }
             }
             missionName.value = '';
             missionReport.value = '';
@@ -238,16 +264,6 @@
         } else {
           alert('Veuillez remplir tous les champs.');
         }
-      });
-
-      document.getElementById('logout').addEventListener('click', () => {
-        signOut(auth).then(() => {
-          localStorage.removeItem('isLoggedIn');
-          localStorage.removeItem('isAdmin');
-          window.location.href = 'index.html';
-        }).catch(error => {
-          console.error('Erreur lors de la déconnexion :', error);
-        });
       });
 
       displayMissions();
