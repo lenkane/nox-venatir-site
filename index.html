@@ -37,26 +37,44 @@
         }
         return gk_fileData[filename] || "";
         }
-        </script><!DOCTYPE html>
+                </script><!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NOX VENATIR</title>
-  <link href="output.css" rel="stylesheet">
+  <title>NOX VENATIR - Organisation Star Citizen</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Orbitron', sans-serif; }
-    .hero-bg { 
-      position: relative; 
-      min-height: 100vh; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('images/banner.gif'); 
-      background-size: cover; 
-      background-position: center; 
+    .hero-bg {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
+    .hero-bg::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0);
+      z-index: 1;
+    }
+    .hero-bg video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+    .hero-content { position: relative; z-index: 2; }
   </style>
 </head>
 <body class="bg-black text-white">
@@ -71,51 +89,50 @@
         <li><a href="#fleet" class="hover:text-red-500 transition">Flotte</a></li>
         <li><a href="#events" class="hover:text-red-500 transition">Événements</a></li>
         <li><a href="#contact" class="hover:text-red-500 transition">Contact</a></li>
-        <li><a href="login.html" class="bg-red-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-500">Espace Membre</a></li>
+        <li><a href="login.html" class="hover:text-red-500 transition">Espace Membre</a></li>
       </ul>
     </div>
   </nav>
 
   <!-- Hero Section -->
-  <section id="home" class="hero-bg">
-    <div class="text-center">
-      <h1 class="text-5xl font-bold text-red-600 mb-4">NOX VENATIR : Chasseurs de la Nuit</h1>
-      <p class="text-xl text-gray-300 mb-8">Une organisation d'élite dans Star Citizen, traquant les ombres et dominant les étoiles.</p>
-      <a href="login.html" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500">Rejoindre les Chasseurs</a>
+  <section id="home" class="hero-bg py-20">
+    <video autoplay muted loop playsinline>
+      <source src="images/banner.mp4" type="video/mp4">
+    </video>
+    <div class="hero-content container mx-auto text-center">
+      <h2 class="text-5xl font-black mb-4 text-red-600">NOX VENATIR : Chasseurs de la Nuit</h2>
+      <p class="text-xl mb-8 text-gray-300">Une organisation d'élite dans Star Citizen, traquant les ombres et dominant les étoiles.</p>
+      <a href="#recruitment" class="bg-red-600 text-white px-8 py-4 rounded-full font-bold hover:bg-red-500 transition">Rejoindre les Chasseurs</a>
     </div>
   </section>
 
   <!-- About Section -->
-  <section id="about" class="bg-gray-900 py-20">
+  <section id="about" class="py-20 bg-gray-900">
     <div class="container mx-auto">
       <h2 class="text-4xl font-bold text-center mb-12 text-white">À Propos de NOX VENATIR</h2>
-      <p class="text-lg text-gray-300 max-w-3xl mx-auto mb-8">
-        NOX VENATIR est une organisation d'élite fondée en 2952, spécialisée dans la chasse stratégique et la défense tactique dans l'univers de Star Citizen. Nos membres sont des traqueurs aguerris, prêts à affronter les dangers de la galaxie.
-      </p>
+      <p class="text-lg text-gray-300 text-center max-w-3xl mx-auto mb-12">NOX VENATIR est une organisation d'élite fondée en 2952, spécialisée dans la chasse stratégique et la défense tactique dans l'univers de Star Citizen. Nos membres sont des traqueurs aguerris, prêts à affronter les dangers de la galaxie.</p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-        <div class="bg-gray-800 p-6 rounded-lg text-center">
-          <h3 class="text-2xl font-semibold text-red-600 mb-2">Chasse</h3>
-          <p class="text-gray-300">Traquer pirates et cibles de haute valeur à travers les systèmes.</p>
+        <div class="text-center">
+          <h3 class="text-2xl font-semibold mb-4 text-red-600">Chasse</h3>
+          <p class="text-gray-400">Traquer pirates et cibles de haute valeur à travers les systèmes.</p>
         </div>
-        <div class="bg-gray-800 p-6 rounded-lg text-center">
-          <h3 class="text-2xl font-semibold text-red-600 mb-2">Tactique</h3>
-          <p class="text-gray-300">Déploiement stratégique pour défendre nos alliés et territoires.</p>
+        <div class="text-center">
+          <h3 class="text-2xl font-semibold mb-4 text-red-600">Tactique</h3>
+          <p class="text-gray-400">Déploiement stratégique pour défendre nos alliés et territoires.</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Recruitment Section -->
-  <section id="recruitment" class="bg-black py-20">
+  <section id="recruitment" class="py-20 bg-black">
     <div class="container mx-auto">
       <h2 class="text-4xl font-bold text-center mb-12 text-white">Rejoignez NOX VENATIR</h2>
-      <p class="text-lg text-gray-300 max-w-3xl mx-auto mb-8">
-        Devenez un chasseur de la nuit. Que vous soyez pilote d'élite ou recrue ambitieuse, nous avons une place pour vous.
-      </p>
+      <p class="text-lg text-gray-300 text-center mb-8">Devenez un chasseur de la nuit. Que vous soyez pilote d'élite ou recrue ambitieuse, nous avons une place pour vous.</p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
         <div class="bg-gray-800 p-6 rounded-lg">
-          <h3 class="text-2xl font-semibold text-red-600 mb-4">Critères</h3>
-          <ul class="text-gray-300 list-disc list-inside">
+          <h3 class="text-xl font-semibold mb-4 text-red-600">Critères</h3>
+          <ul class="space-y-2 text-gray-400">
             <li>Âge minimum : 18 ans</li>
             <li>Package Star Citizen actif</li>
             <li>Microphone fonctionnel pour Discord</li>
@@ -123,58 +140,58 @@
           </ul>
         </div>
         <div class="bg-gray-800 p-6 rounded-lg">
-          <h3 class="text-2xl font-semibold text-red-600 mb-4">Processus</h3>
-          <ul class="text-gray-300 list-disc list-inside">
+          <h3 class="text-xl font-semibold mb-4 text-red-600">Processus</h3>
+          <ol class="space-y-2 text-gray-400 list-decimal pl-4">
             <li>Envoyez votre candidature</li>
             <li>Entretien sur Discord</li>
             <li>Épreuve de vol tactique</li>
             <li>Intégration dans la flotte</li>
-          </ul>
+          </ol>
         </div>
       </div>
       <div class="text-center mt-8">
-        <a href="#contact" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500">Postuler Maintenant</a>
+        <a href="#contact" class="bg-red-600 text-white px-8 py-4 rounded-full font-bold hover:bg-red-500 transition">Postuler Maintenant</a>
       </div>
     </div>
   </section>
 
   <!-- Fleet Section -->
-  <section id="fleet" class="bg-gray-900 py-20">
+  <section id="fleet" class="py-20 bg-gray-900">
     <div class="container mx-auto">
       <h2 class="text-4xl font-bold text-center mb-12 text-white">Notre Flotte</h2>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div class="bg-gray-800 p-6 rounded-lg text-center">
-          <img src="images/small-ship.png" alt="Chasseurs" class="w-full h-48 object-cover rounded-lg mb-4">
-          <h3 class="text-2xl font-semibold text-red-600 mb-2">Chasseurs (20)</h3>
-          <p class="text-gray-300">Sabre, Hornet, Eclipse.</p>
+          <img src="images/small-ship.png" alt="Small Ship" class="mx-auto mb-1 w-40 h-40 object-contain">
+          <h3 class="text-xl font-semibold mb-2 text-red-600">Chasseurs (20)</h3>
+          <p class="text-gray-400">Sabre, Hornet, Eclipse.</p>
         </div>
         <div class="bg-gray-800 p-6 rounded-lg text-center">
-          <img src="images/medium-ship.png" alt="Supports" class="w-full h-48 object-cover rounded-lg mb-4">
-          <h3 class="text-2xl font-semibold text-red-600 mb-2">Supports (10)</h3>
-          <p class="text-gray-300">Vanguard, Retaliator.</p>
+          <img src="images/medium-ship.png" alt="Medium Ship" class="mx-auto mb-1 w-40 h-40 object-contain">
+          <h3 class="text-xl font-semibold mb-2 text-red-600">Supports (10)</h3>
+          <p class="text-gray-400">Vanguard, Retaliator.</p>
         </div>
         <div class="bg-gray-800 p-6 rounded-lg text-center">
-          <img src="images/large-ship.png" alt="Capitale" class="w-full h-48 object-cover rounded-lg mb-4">
-          <h3 class="text-2xl font-bold text-red-600 mb-2">Capitale (3)</h3>
-          <p class="text-gray-300">Idris, Kraken.</p>
+          <img src="images/large-ship.png" alt="Large Ship" class="mx-auto mb-1 w-40 h-40 object-contain">
+          <h3 class="text-xl font-semibold mb-2 text-red-600">Capitale (3)</h3>
+          <p class="text-gray-400">Idris, Kraken.</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- Events Section -->
-  <section id="events" class="bg-black py-20">
+  <section id="events" class="py-20 bg-black">
     <div class="container mx-auto">
       <h2 class="text-4xl font-bold text-center mb-12 text-white">Événements à Venir</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
         <div class="bg-gray-800 p-6 rounded-lg">
-          <h3 class="text-2xl font-semibold text-red-600 mb-2">Chasse aux Pirates</h3>
-          <p class="text-gray-400 mb-2">Date : 30 Septembre 2955</p>
+          <h3 class="text-xl font-semibold mb-2 text-red-600">Chasse aux Pirates</h3>
+          <p class="text-gray-400 mb-4">Date : 30 Septembre 2955</p>
           <p class="text-gray-300">Opération de traque dans le système Pyro. Rejoignez-nous sur Discord.</p>
         </div>
         <div class="bg-gray-800 p-6 rounded-lg">
-          <h3 class="text-2xl font-semibold text-red-600 mb-2">Assaut Tactique</h3>
-          <p class="text-gray-400 mb-2">Date : 15 Octobre 2955</p>
+          <h3 class="text-xl font-semibold mb-2 text-red-600">Assaut Tactique</h3>
+          <p class="text-gray-400 mb-4">Date : 15 Octobre 2955</p>
           <p class="text-gray-300">Mission d'interception dans Stanton.</p>
         </div>
       </div>
@@ -185,20 +202,20 @@
   <section id="contact" class="bg-gray-900 py-20">
     <div class="container mx-auto">
       <h2 class="text-4xl font-bold text-center mb-12 text-white">Contactez NOX VENATIR</h2>
-      <div class="max-w-md mx-auto bg-gray-800 p-8 rounded-lg">
-        <div class="mb-4">
-          <label for="handle" class="block text-gray-300 font-semibold mb-2">Nom (Handle RSI)</label>
-          <input type="text" id="handle" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="Votre handle RSI">
+      <div class="max-w-lg mx-auto">
+        <div class="bg-gray-800 p-8 rounded-lg">
+          <div class="mb-6">
+            <label for="name" class="block text-gray-300 font-semibold mb-2">Nom (Handle RSI)</label>
+            <input type="text" id="name" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-4 text-white" placeholder="Votre handle RSI">
+          </div>
+          <div class="mb-6">
+            <label for="message" class="block text-gray-300 font-semibold mb-2">Message</label>
+            <textarea id="message" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-4 text-white" rows="5" placeholder="Pourquoi voulez-vous rejoindre NOX VENATIR ?"></textarea>
+          </div>
+          <button id="submitContact" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Envoyer la Candidature</button>
         </div>
-        <div class="mb-4">
-          <label for="message" class="block text-gray-300 font-semibold mb-2">Message</label>
-          <textarea id="message" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" rows="5" placeholder="Votre message"></textarea>
-        </div>
-        <button class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Envoyer la Candidature</button>
       </div>
-      <p class="text-center text-gray-400 mt-4">
-        Ou rejoignez-nous sur <a href="https://discord.gg/noxvenatir" class="text-red-500 hover:underline">Discord</a> | <a href="https://robertsspaceindustries.com/orgs/NOXVENATIR" class="text-red-500 hover:underline">Page RSI</a>
-      </p>
+      <p class="text-center mt-8 text-gray-400">Ou rejoignez-nous sur <a href="https://discord.gg/noxvenatir" class="text-red-500 hover:underline">Discord</a> | <a href="https://robertsspaceindustries.com/orgs/NOXVENATIR" class="text-red-500 hover:underline">Page RSI</a></p>
     </div>
   </section>
 
