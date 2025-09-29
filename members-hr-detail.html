@@ -267,7 +267,7 @@
     </div>
   </footer>
 
-  <!-- JavaScript -->
+ <!-- JavaScript -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
@@ -280,14 +280,17 @@
 
     onAuthStateChanged(auth, user => {
       if (!user) {
+        console.log('Utilisateur non connecté, redirection vers login.html');
         window.location.href = 'login.html';
-      } else {
-        user.getIdTokenResult().then(idTokenResult => {
-          const isAdmin = idTokenResult.claims.isAdmin || false;
-          localStorage.setItem('isAdmin', isAdmin.toString());
-          initializePage();
-        });
+        return;
       }
+      user.getIdTokenResult().then(idTokenResult => {
+        const isAdmin = idTokenResult.claims.isAdmin || false;
+        localStorage.setItem('isAdmin', isAdmin.toString());
+        initializePage();
+      }).catch(error => {
+        console.error('Erreur lors de la récupération du token :', error);
+      });
     });
 
     document.getElementById('logout').addEventListener('click', () => {
@@ -295,22 +298,35 @@
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('isAdmin');
         window.location.href = 'index.html';
+      }).catch(error => {
+        console.error('Erreur lors de la déconnexion :', error);
       });
     });
 
     async function initializePage() {
+      console.log('Initialisation de la page détails...');
       const isAdmin = localStorage.getItem('isAdmin') === 'true';
       const urlParams = new URLSearchParams(window.location.search);
       const memberId = urlParams.get('id');
 
       if (!memberId) {
+        console.error('Aucun ID de membre fourni');
         window.location.href = 'members-hr.html';
         return;
       }
 
       const adminSection = document.getElementById('adminSection');
+      const saveDetails = document.getElementById('saveDetails');
+      const decorationList = document.getElementById('decorationList');
+
+      if (!adminSection || !saveDetails || !decorationList) {
+        console.error('Erreur : un ou plusieurs éléments DOM manquants (adminSection, saveDetails, decorationList)');
+        return;
+      }
+
       if (!isAdmin) {
         adminSection.style.display = 'none';
+        saveDetails.style.display = 'none';
       }
 
       const memberName = document.getElementById('memberName');
@@ -321,15 +337,20 @@
       const role = document.getElementById('role');
       const missionCount = document.getElementById('missionCount');
       const miscInfo = document.getElementById('miscInfo');
-      const saveDetails = document.getElementById('saveDetails');
       const newDecoration = document.getElementById('newDecoration');
       const addDecoration = document.getElementById('addDecoration');
-      const decorationList = document.getElementById('decorationList');
+
+      if (!memberName || !memberVideo || !race || !age || !origin || !role || !missionCount || !miscInfo || !newDecoration || !addDecoration) {
+        console.error('Erreur : un ou plusieurs éléments DOM manquants');
+        return;
+      }
 
       async function loadMember() {
+        console.log('Chargement du membre depuis Firestore :', memberId);
         const memberDoc = await getDoc(doc(db, 'members', memberId));
         if (memberDoc.exists()) {
           const member = memberDoc.data();
+          console.log('Membre chargé :', member);
           memberName.textContent = member.name;
           memberVideo.querySelector('source').src = member.video;
           memberVideo.load();
@@ -341,25 +362,33 @@
           miscInfo.value = member.miscInfo || '';
 
           decorationList.innerHTML = '';
-          (member.decorations || []).forEach((decoration, index) => {
-            const decorationDiv = document.createElement('div');
-            decorationDiv.className = 'bg-gray-700 p-4 rounded-lg flex justify-between items-center';
-            decorationDiv.innerHTML = `
-              <span class="text-red-500">${decoration}</span>
-              <button class="deleteDecoration bg-red-600 text-white px-3 py-1 rounded-full text-sm hover:bg-red-500" data-index="${index}" ${!isAdmin ? 'style="display:none;"' : ''}>Supprimer</button>
-            `;
-            decorationList.appendChild(decorationDiv);
-          });
+          const decorations = member.decorations || [];
+          if (decorations.length === 0) {
+            console.log('Aucune décoration pour ce membre');
+            decorationList.innerHTML = '<p class="text-gray-400">Aucune décoration disponible.</p>';
+          } else {
+            decorations.forEach((decoration, index) => {
+              const decorationDiv = document.createElement('div');
+              decorationDiv.className = 'bg-gray-700 p-4 rounded-lg flex justify-between items-center';
+              decorationDiv.innerHTML = `
+                <span class="text-red-500">${decoration}</span>
+                <button class="deleteDecoration bg-red-600 text-white px-3 py-1 rounded-full text-sm hover:bg-red-500" data-index="${index}" ${isAdmin ? '' : 'style="display:none;"'}>Supprimer</button>
+              `;
+              decorationList.appendChild(decorationDiv);
+            });
+          }
 
           document.querySelectorAll('.deleteDecoration').forEach(button => {
             button.addEventListener('click', async function() {
               const index = parseInt(this.dataset.index);
-              const updatedDecorations = member.decorations.filter((_, i) => i !== index);
+              const updatedDecorations = decorations.filter((_, i) => i !== index);
               await updateDoc(doc(db, 'members', memberId), { decorations: updatedDecorations });
+              console.log('Décoration supprimée à l\'index :', index);
               loadMember();
             });
           });
         } else {
+          console.error('Membre non trouvé :', memberId);
           window.location.href = 'members-hr.html';
         }
       }
@@ -374,6 +403,7 @@
               role: role.value.trim(),
               miscInfo: miscInfo.value.trim()
             });
+            console.log('Détails du membre enregistrés :', memberId);
             alert('Détails enregistrés.');
           } catch (error) {
             console.error('Erreur lors de l\'enregistrement des détails :', error);
@@ -387,14 +417,13 @@
             const member = memberDoc.data();
             const updatedDecorations = [...(member.decorations || []), newDecoration.value.trim()];
             await updateDoc(doc(db, 'members', memberId), { decorations: updatedDecorations });
+            console.log('Décoration ajoutée :', newDecoration.value);
             newDecoration.value = '';
             loadMember();
           } else {
             alert('Veuillez saisir un nom de décoration.');
           }
         });
-      } else {
-        saveDetails.style.display = 'none';
       }
 
       loadMember();
