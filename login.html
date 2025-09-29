@@ -54,15 +54,6 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      background: black;
-    }
-    .login-bg canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
     }
     .login-bg::before {
       content: '';
@@ -74,6 +65,15 @@
       background: rgba(0, 0, 0, 0.5);
       z-index: 1;
       pointer-events: none;
+    }
+    .login-bg video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
     }
     .login-container { text-align: center; z-index: 20; }
     .scan-button {
@@ -118,7 +118,7 @@
       transition: opacity 0.5s ease, transform 0.5s ease;
       margin-top: 20px;
       z-index: 20;
-      padding: 8px;
+      padding: 8px; /* Conservé pour la taille réduite */
       border-radius: 10px;
       pointer-events: auto;
     }
@@ -137,39 +137,43 @@
       <a href="index.html" class="bg-red-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-500">Retour</a>
     </div>
   </nav>
+
   <!-- Login Section -->
   <section class="login-bg">
-    <canvas id="fingerprintCanvas"></canvas>
+    <video autoplay muted loop playsinline id="loginVideo">
+      <source src="images/login-bg.mp4" type="video/mp4">
+    </video>
     <div class="container mx-auto">
       <div class="login-container">
         <div class="scan-button" id="scanButton">
           <span>Scanner</span>
         </div>
         <div class="login-form" id="loginForm">
-          <h2 class="text-xl font-bold mb-4 text-red-600">Connexion Membre</h2>
+          <h2 class="text-2xl font-bold mb-4 text-white-600">Accès Membre</h2>
           <div class="mb-4">
-            <label for="username" class="block text-gray-300 font-semibold mb-2">Identifiant NOX</label>
-            <input type="text" id="username" class="w-full max-w-xs mx-auto p-2 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="NOX ID">
+            <label for="username" class="block text-white-300 font-semibold mb-2">Identification NOX</label>
+            <input type="text" id="username" class="w-full max-w-md mx-auto p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="ID NOX VENATIR">
           </div>
           <div class="mb-4">
-            <label for="password" class="block text-gray-300 font-semibold mb-2">Clé de cryptage</label>
-            <input type="password" id="password" class="w-full max-w-xs mx-auto p-2 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="N° clé de cryptage">
+            <label for="password" class="block text-white-300 font-semibold mb-2">Clé de cryptage</label>
+            <input type="password" id="password" class="w-full max-w-md mx-auto p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="Votre clé fourni par ARTEMIS CORPORATION">
           </div>
           <div class="flex justify-center space-x-4">
-            <button id="loginSubmit" class="bg-red-600 text-white px-3 py-1.5 rounded-full font-semibold hover:bg-red-500">Connexion</button>
-            <a href="index.html" class="bg-gray-600 text-white px-3 py-1.5 rounded-full font-semibold hover:bg-gray-500">Annuler</a>
+            <button id="loginSubmit" class="bg-red-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-500">Connexion</button>
+            <a href="index.html" class="bg-gray-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-gray-500">Annuler</a>
           </div>
-          <p id="error" class="text-red-500 text-sm mt-4 hidden">Erreur lors de la connexion. Vérifiez vos identifiants.</p>
         </div>
       </div>
     </div>
   </section>
+
   <!-- Footer -->
   <footer class="bg-gray-900 text-gray-400 py-6 border-t border-red-600/50">
     <div class="container mx-auto text-center">
       <p>&copy; 2955 NOX VENATIR. Tous droits réservés. Hunt the stars, citizen.</p>
     </div>
   </footer>
+
   <!-- JavaScript -->
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
@@ -185,9 +189,8 @@
       const loginSubmit = document.getElementById('loginSubmit');
       const usernameInput = document.getElementById('username');
       const passwordInput = document.getElementById('password');
-      const errorMessage = document.getElementById('error');
 
-      if (!scanButton || !loginForm || !loginSubmit || !usernameInput || !passwordInput || !errorMessage) {
+      if (!scanButton || !loginForm || !loginSubmit || !usernameInput || !passwordInput) {
         console.error('Erreur : un ou plusieurs éléments DOM manquants');
         return;
       }
@@ -204,80 +207,23 @@
         const password = passwordInput.value;
         const email = `${username}@noxvenatir.com`;
 
-        if (username && password) {
-          signInWithEmailAndPassword(auth, email, password)
-            .then(userCredential => {
-              const user = userCredential.user;
-              return user.getIdTokenResult();
-            })
-            .then(idTokenResult => {
-              localStorage.setItem('isLoggedIn', 'true');
-              localStorage.setItem('isAdmin', idTokenResult.claims.isAdmin ? 'true' : 'false');
-              usernameInput.value = '';
-              passwordInput.value = '';
-              window.location.href = 'members-home.html';
-            })
-            .catch(error => {
-              console.error('Erreur de connexion :', error);
-              errorMessage.classList.remove('hidden');
-            });
-        } else {
-          errorMessage.classList.remove('hidden');
-        }
+        signInWithEmailAndPassword(auth, email, password)
+          .then(userCredential => {
+            const user = userCredential.user;
+            return user.getIdTokenResult();
+          })
+          .then(idTokenResult => {
+            localStorage.setItem('isLoggedIn', 'true');
+            localStorage.setItem('isAdmin', idTokenResult.claims.isAdmin ? 'true' : 'false');
+            usernameInput.value = '';
+            passwordInput.value = '';
+            window.location.href = 'members-home.html';
+          })
+          .catch(error => {
+            console.error('Erreur de connexion :', error);
+            alert('Nom d\'utilisateur ou mot de passe incorrect.');
+          });
       });
-
-      // Canvas animation for fingerprint scanner
-      const canvas = document.getElementById('fingerprintCanvas');
-      const ctx = canvas.getContext('2d');
-
-      function resizeCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
-      window.addEventListener('resize', resizeCanvas);
-      resizeCanvas();
-
-      let time = 0;
-      function drawFingerprint() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
-        ctx.lineWidth = 2;
-
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        const maxRadius = Math.min(canvas.width, canvas.height) * 0.4;
-
-        // Draw concentric arcs
-        for (let i = 0; i < 5; i++) {
-          const radius = maxRadius * (0.2 + i * 0.15);
-          ctx.beginPath();
-          ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-          ctx.stroke();
-        }
-
-        // Draw scanning line
-        ctx.strokeStyle = 'rgba(255, 0, 0, 0.8)';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        const scanY = centerY + Math.sin(time * 0.02) * (maxRadius * 0.8);
-        ctx.moveTo(centerX - maxRadius, scanY);
-        ctx.lineTo(centerX + maxRadius, scanY);
-        ctx.stroke();
-
-        // Draw random fingerprint-like curves
-        ctx.strokeStyle = 'rgba(255, 0, 0, 0.3)';
-        ctx.lineWidth = 1;
-        for (let i = 0; i < 10; i++) {
-          ctx.beginPath();
-          const offset = Math.sin(time * 0.01 + i) * 20;
-          ctx.arc(centerX + offset, centerY, maxRadius * (0.3 + i * 0.05), 0, Math.PI * 1.5);
-          ctx.stroke();
-        }
-
-        time++;
-        requestAnimationFrame(drawFingerprint);
-      }
-      drawFingerprint();
     });
   </script>
 </body>
