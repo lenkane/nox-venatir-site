@@ -37,7 +37,7 @@
         }
         return gk_fileData[filename] || "";
         }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
@@ -46,11 +46,18 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Orbitron', sans-serif; }
-    .bg-members { background: black }
+    body { font-family: 'Orbitron', sans-serif; background: black; }
     #memberVideo { width: 100%; height: 100%; object-fit: cover; border-radius: 0.5rem; aspect-ratio: 16/9; }
     .progress-bar { background-color: #4a5568; border-radius: 0.5rem; overflow: hidden; }
     .progress-bar-fill { background-color: #e53e3e; height: 1rem; transition: width 0.3s ease; }
+    .modal { display: none; position: fixed; z-index: 50; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); align-items: center; justify-content: center; }
+    .modal-content { background-color: #2a2a2a; padding: 20px; border-radius: 0.5rem; max-width: 500px; width: 90%; }
+    .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+    .close:hover, .close:focus { color: white; text-decoration: none; }
+    .medal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 1rem; }
+    .medal-item { text-align: center; }
+    .medal-item img { width: 100px; height: 100px; object-fit: contain; border-radius: 0.5rem; cursor: pointer; }
+    .medal-item p { color: #e53e3e; font-size: 0.875rem; margin-top: 0.5rem; }
   </style>
 </head>
 <body class="bg-black text-white">
@@ -70,16 +77,16 @@
   </nav>
 
   <!-- Member Details Section -->
-  <section class="bg-members py-20">
+  <section class="py-20">
     <div class="container mx-auto">
       <h2 class="text-4xl font-bold text-center mb-12 text-white" id="memberName">Détails Membre</h2>
       <div class="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg">
         <div class="flex flex-col md:flex-row">
           <div class="md:w-2/3 mb-8 md:mb-0">
-            <video autoplay muted loop playsinline class="w-full h-64 rounded-lg" id="memberVideo">
+            <video autoplay muted loop playsinline class="w-full rounded-lg" id="memberVideo">
               <source src="" type="video/mp4">
             </video>
-            <p id="videoError" class="text-red-500 text-sm mt-2 hidden">Erreur : Vidéo non disponible</p>
+            <p id="videoError" class="text-red-500 text-sm mt-2 hidden">Erreur : Vidéo non disponible. Vérifiez le chemin dans Firestore.</p>
           </div>
           <div class="md:w-1/3 md:pl-8">
             <div class="mb-4">
@@ -114,12 +121,49 @@
         </div>
         <div class="mt-8" id="adminSection">
           <h3 class="text-2xl font-semibold mb-4 text-red-600">Ajouter une Décoration</h3>
-          <input type="text" id="newDecoration" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-4 text-white" placeholder="Nom de la décoration (ex. medaille-pyro.png)">
-          <button id="addDecoration" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Ajouter</button>
-          <div id="decorationList" class="mt-4 space-y-4">
-            <!-- Decorations will be dynamically added here -->
+          <button id="addDecoration" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Ajouter une Médaille</button>
+        </div>
+        <!-- Medal Grid -->
+        <div class="mt-8">
+          <h3 class="text-2xl font-semibold mb-4 text-red-600">Médailles</h3>
+          <div id="medalGrid" class="medal-grid">
+            <!-- Medals will be dynamically added here -->
           </div>
         </div>
+      </div>
+    </div>
+    <!-- Add Medal Modal -->
+    <div id="addMedalModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3 class="text-xl font-semibold mb-4 text-red-600">Ajouter une Médaille</h3>
+        <div class="mb-4">
+          <label class="block text-gray-300 font-semibold mb-2">Nom de la médaille</label>
+          <input type="text" id="medalName" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="Nom de la médaille">
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-300 font-semibold mb-2">Date d'obtention</label>
+          <input type="date" id="medalDate" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white">
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-300 font-semibold mb-2">Description</label>
+          <textarea id="medalDescription" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" rows="4" placeholder="Description de la médaille"></textarea>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-300 font-semibold mb-2">Image de la médaille</label>
+          <input type="text" id="medalImage" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="Chemin de l'image (ex. images/medaille-pyro.png)">
+        </div>
+        <button id="submitMedal" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Ajouter</button>
+      </div>
+    </div>
+    <!-- Medal Details Modal -->
+    <div id="medalDetailsModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3 class="text-xl font-semibold mb-4 text-red-600" id="detailMedalName"></h3>
+        <p class="text-gray-300 mb-2"><strong>Date :</strong> <span id="detailMedalDate"></span></p>
+        <p class="text-gray-300 mb-2"><strong>Description :</strong> <span id="detailMedalDescription"></span></p>
+        <img id="detailMedalImage" class="w-full h-32 object-contain rounded-lg mb-4" src="" alt="Médaille">
       </div>
     </div>
   </section>
@@ -181,10 +225,14 @@
 
       const adminSection = document.getElementById('adminSection');
       const saveDetails = document.getElementById('saveDetails');
-      const decorationList = document.getElementById('decorationList');
+      const medalGrid = document.getElementById('medalGrid');
+      const addDecoration = document.getElementById('addDecoration');
+      const addMedalModal = document.getElementById('addMedalModal');
+      const medalDetailsModal = document.getElementById('medalDetailsModal');
+      const submitMedal = document.getElementById('submitMedal');
 
-      if (!adminSection || !saveDetails || !decorationList) {
-        console.error('Erreur : un ou plusieurs éléments DOM manquants (adminSection, saveDetails, decorationList)');
+      if (!adminSection || !saveDetails || !medalGrid || !addDecoration || !addMedalModal || !medalDetailsModal || !submitMedal) {
+        console.error('Erreur : un ou plusieurs éléments DOM manquants');
         return;
       }
 
@@ -203,71 +251,101 @@
       const missionCount = document.getElementById('missionCount');
       const missionCountBar = document.getElementById('missionCountBar');
       const miscInfo = document.getElementById('miscInfo');
-      const newDecoration = document.getElementById('newDecoration');
-      const addDecoration = document.getElementById('addDecoration');
+      const medalName = document.getElementById('medalName');
+      const medalDate = document.getElementById('medalDate');
+      const medalDescription = document.getElementById('medalDescription');
+      const medalImage = document.getElementById('medalImage');
+      const detailMedalName = document.getElementById('detailMedalName');
+      const detailMedalDate = document.getElementById('detailMedalDate');
+      const detailMedalDescription = document.getElementById('detailMedalDescription');
+      const detailMedalImage = document.getElementById('detailMedalImage');
 
-      if (!memberName || !memberVideo || !videoError || !race || !age || !origin || !role || !missionCount || !missionCountBar || !miscInfo || !newDecoration || !addDecoration) {
+      if (!memberName || !memberVideo || !videoError || !race || !age || !origin || !role || !missionCount || !missionCountBar || !miscInfo || !medalName || !medalDate || !medalDescription || !medalImage || !detailMedalName || !detailMedalDate || !detailMedalDescription || !detailMedalImage) {
         console.error('Erreur : un ou plusieurs éléments DOM manquants');
         return;
       }
 
+      // Modal handling
+      const closeButtons = document.querySelectorAll('.close');
+      closeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          addMedalModal.style.display = 'none';
+          medalDetailsModal.style.display = 'none';
+        });
+      });
+
+      window.addEventListener('click', event => {
+        if (event.target === addMedalModal) {
+          addMedalModal.style.display = 'none';
+        }
+        if (event.target === medalDetailsModal) {
+          medalDetailsModal.style.display = 'none';
+        }
+      });
+
       async function loadMember() {
         console.log('Chargement du membre depuis Firestore :', memberId);
-        const memberDoc = await getDoc(doc(db, 'members', memberId));
-        if (memberDoc.exists()) {
-          const member = memberDoc.data();
-          console.log('Membre chargé :', member);
-          memberName.textContent = member.name;
-          
-          // Vérifier et charger la vidéo
-          if (member.video && member.video !== '') {
-            console.log('Chargement de la vidéo :', member.video);
-            memberVideo.querySelector('source').src = member.video;
-            memberVideo.load();
-            videoError.classList.add('hidden');
+        try {
+          const memberDoc = await getDoc(doc(db, 'members', memberId));
+          if (memberDoc.exists()) {
+            const member = memberDoc.data();
+            console.log('Membre chargé :', member);
+            memberName.textContent = member.name || 'Inconnu';
+
+            // Vérifier et charger la vidéo
+            if (member.video && member.video !== '' && member.video !== 'images/""' && member.video.endsWith('.mp4')) {
+              console.log('Chargement de la vidéo :', member.video);
+              memberVideo.querySelector('source').src = member.video;
+              memberVideo.load();
+              videoError.classList.add('hidden');
+            } else {
+              console.error('Champ vidéo vide ou invalide pour le membre :', memberId, 'Video:', member.video);
+              memberVideo.querySelector('source').src = '';
+              videoError.textContent = `Erreur : Vidéo non disponible pour ${member.name || 'ce membre'}. Vérifiez le chemin dans Firestore.`;
+              videoError.classList.remove('hidden');
+            }
+
+            race.value = member.race || '';
+            age.value = member.age || '';
+            origin.value = member.origin || '';
+            role.value = member.role || '';
+            missionCount.textContent = member.missionCount || 0;
+            missionCountBar.style.width = `${Math.min((member.missionCount || 0) * 10, 100)}%`;
+
+            miscInfo.value = member.miscInfo || '';
+
+            medalGrid.innerHTML = '';
+            const decorations = member.decorations || [];
+            if (decorations.length === 0) {
+              console.log('Aucune décoration pour ce membre');
+              medalGrid.innerHTML = '<p class="text-gray-400 text-center">Aucune médaille disponible.</p>';
+            } else {
+              decorations.forEach((decoration, index) => {
+                const medalDiv = document.createElement('div');
+                medalDiv.className = 'medal-item';
+                medalDiv.innerHTML = `
+                  <img src="${decoration.image || 'images/placeholder.png'}" alt="${decoration.name || 'Médaille'}" data-index="${index}">
+                  <p>${decoration.name || 'Sans nom'}</p>
+                `;
+                medalGrid.appendChild(medalDiv);
+
+                medalDiv.querySelector('img').addEventListener('click', () => {
+                  detailMedalName.textContent = decoration.name || 'Sans nom';
+                  detailMedalDate.textContent = decoration.date || 'Inconnue';
+                  detailMedalDescription.textContent = decoration.description || 'Aucune description';
+                  detailMedalImage.src = decoration.image || 'images/placeholder.png';
+                  medalDetailsModal.style.display = 'flex';
+                });
+              });
+            }
           } else {
-            console.error('Champ vidéo vide ou invalide pour le membre :', memberId);
-            memberVideo.querySelector('source').src = '';
-            videoError.classList.remove('hidden');
+            console.error('Membre non trouvé :', memberId);
+            window.location.href = 'members-hr.html';
           }
-
-          race.value = member.race || '';
-          age.value = member.age || '';
-          origin.value = member.origin || '';
-          role.value = member.race || '';
-          missionCount.textContent = member.missionCount || 0;
-          missionCountBar.style.width = `${Math.min((member.missionCount || 0) * 10, 100)}%`; // Échelle : 10 missions = 100%
-          miscInfo.value = member.miscInfo || '';
-
-          decorationList.innerHTML = '';
-          const decorations = member.decorations || [];
-          if (decorations.length === 0) {
-            console.log('Aucune décoration pour ce membre');
-            decorationList.innerHTML = '<p class="text-gray-400">Aucune décoration disponible.</p>';
-          } else {
-            decorations.forEach((decoration, index) => {
-              const decorationDiv = document.createElement('div');
-              decorationDiv.className = 'bg-gray-700 p-4 rounded-lg flex justify-between items-center';
-              decorationDiv.innerHTML = `
-                <span class="text-red-500">${decoration}</span>
-                <button class="deleteDecoration bg-red-600 text-white px-3 py-1 rounded-full text-sm hover:bg-red-500" data-index="${index}" ${isAdmin ? '' : 'style="display:none;"'}>Supprimer</button>
-              `;
-              decorationList.appendChild(decorationDiv);
-            });
-          }
-
-          document.querySelectorAll('.deleteDecoration').forEach(button => {
-            button.addEventListener('click', async function() {
-              const index = parseInt(this.dataset.index);
-              const updatedDecorations = decorations.filter((_, i) => i !== index);
-              await updateDoc(doc(db, 'members', memberId), { decorations: updatedDecorations });
-              console.log('Décoration supprimée à l\'index :', index);
-              loadMember();
-            });
-          });
-        } else {
-          console.error('Membre non trouvé :', memberId);
-          window.location.href = 'members-hr.html';
+        } catch (error) {
+          console.error('Erreur lors du chargement du membre :', error);
+          videoError.textContent = 'Erreur lors du chargement du membre. Vérifiez la console.';
+          videoError.classList.remove('hidden');
         }
       }
 
@@ -289,17 +367,35 @@
           }
         });
 
-        addDecoration.addEventListener('click', async () => {
-          if (newDecoration.value.trim()) {
-            const memberDoc = await getDoc(doc(db, 'members', memberId));
-            const member = memberDoc.data();
-            const updatedDecorations = [...(member.decorations || []), newDecoration.value.trim()];
-            await updateDoc(doc(db, 'members', memberId), { decorations: updatedDecorations });
-            console.log('Décoration ajoutée :', newDecoration.value);
-            newDecoration.value = '';
-            loadMember();
+        addDecoration.addEventListener('click', () => {
+          medalName.value = '';
+          medalDate.value = '';
+          medalDescription.value = '';
+          medalImage.value = '';
+          addMedalModal.style.display = 'flex';
+        });
+
+        submitMedal.addEventListener('click', async () => {
+          if (medalName.value.trim() && medalDate.value.trim() && medalDescription.value.trim() && medalImage.value.trim()) {
+            try {
+              const memberDoc = await getDoc(doc(db, 'members', memberId));
+              const member = memberDoc.data();
+              const updatedDecorations = [...(member.decorations || []), {
+                name: medalName.value.trim(),
+                date: medalDate.value.trim(),
+                description: medalDescription.value.trim(),
+                image: medalImage.value.trim()
+              }];
+              await updateDoc(doc(db, 'members', memberId), { decorations: updatedDecorations });
+              console.log('Médaille ajoutée :', medalName.value);
+              addMedalModal.style.display = 'none';
+              loadMember();
+            } catch (error) {
+              console.error('Erreur lors de l\'ajout de la médaille :', error);
+              alert('Erreur lors de l\'ajout de la médaille. Vérifiez la console.');
+            }
           } else {
-            alert('Veuillez saisir un nom de décoration.');
+            alert('Veuillez remplir tous les champs.');
           }
         });
       }
