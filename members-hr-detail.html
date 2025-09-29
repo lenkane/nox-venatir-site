@@ -43,141 +43,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NOX VENATIR - Détails Membre</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="output.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Orbitron', sans-serif; background: black; }
-    .sci-fi-effect { position: relative; overflow: hidden; }
-    .sci-fi-effect::before {
-      content: '';
-      position: absolute;
-      top: 0; left: -100%;
-      width: 100%; height: 2px;
-      background: #ff0000;
-      animation: scan-line 5s infinite linear;
-    }
-    @keyframes scan-line {
-      0% { top: 0; }
-      100% { top: 100%; }
-    }
-    .decorations-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-      gap: 12px;
-      padding: 15px;
-      background: #1a1a1a;
-      border: 2px solid #ff0000;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(255, 0, 0, 0.5), inset 0 0 8px rgba(255, 0, 0, 0.3);
-    }
-    .decoration-item {
-      position: relative;
-      display: inline-block;
-    }
-    .decoration-item img {
-      width: 100px;
-      height: 100px;
-      object-fit: contain;
-      border: 1px solid #ff0000;
-      border-radius: 6px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      animation: pulse-decoration 2s infinite;
-      cursor: pointer;
-    }
-    .decoration-item img:hover {
-      transform: scale(1.1);
-      box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
-    }
-    .decoration-item button {
-      position: absolute;
-      top: -10px;
-      right: -10px;
-      background: #ff0000;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      font-size: 12px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    .decoration-item button:hover {
-      background: #cc0000;
-    }
-    @keyframes pulse-decoration {
-      0% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.4); }
-      50% { box-shadow: 0 0 10px rgba(255, 0, 0, 0.6); }
-      100% { box-shadow: 0 0 5px rgba(255, 0, 0, 0.4); }
-    }
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-content {
-      background: #1a1a1a;
-      padding: 20px;
-      border: 2px solid #ff0000;
-      border-radius: 10px;
-      box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
-      width: 90%;
-      max-width: 500px;
-      position: relative;
-    }
-    .modal-content::before {
-      content: '';
-      position: absolute;
-      top: 0; left: -100%;
-      width: 100%; height: 2px;
-      background: #ff0000;
-      animation: scan-line 5s infinite linear;
-    }
-    .modal-content input, .modal-content textarea {
-      width: 100%;
-      padding: 10px;
-      background: #2a2a2a;
-      border: 1px solid #ff0000;
-      border-radius: 5px;
-      color: white;
-      margin-bottom: 10px;
-    }
-    .modal-content button {
-      background: #ff0000;
-      color: white;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-      width: 100%;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    .modal-content button:hover {
-      background: #cc0000;
-    }
-    .modal-content .close {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: #ff0000;
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
-      line-height: 24px;
-      text-align: center;
-      cursor: pointer;
-    }
-    .modal-content .close:hover {
-      background: #cc0000;
-    }
+    body { font-family: 'Orbitron', sans-serif; }
+    .bg-members { background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('images/banner.gif'); background-size: cover; background-position: center; }
   </style>
 </head>
 <body class="bg-black text-white">
@@ -196,69 +66,56 @@
     </div>
   </nav>
 
-  <!-- Member Detail Section -->
-  <section class="py-20">
+  <!-- Member Details Section -->
+  <section class="bg-members py-20">
     <div class="container mx-auto">
-      <h2 id="memberName" class="text-4xl font-bold text-center mb-12 text-white">Détails du Membre</h2>
-      <div class="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-8 max-w-4xl mx-auto">
-        <div class="video-container">
-          <video id="memberVideo" autoplay muted loop playsinline class="w-full h-full object-cover rounded-lg">
-            <source src="" type="video/mp4">
-          </video>
-        </div>
-        <div class="sci-fi-effect bg-gray-800 p-8 rounded-lg">
-          <h3 class="text-2xl font-semibold mb-4 text-red-600">Informations</h3>
-          <div class="space-y-4">
-            <div>
-              <label for="race" class="block text-gray-300 font-semibold mb-2">Race</label>
-              <input type="text" id="race" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white">
-            </div>
-            <div>
-              <label for="age" class="block text-gray-300 font-semibold mb-2">Âge</label>
-              <input type="text" id="age" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white">
-            </div>
-            <div>
-              <label for="origin" class="block text-gray-300 font-semibold mb-2">Origine</label>
-              <input type="text" id="origin" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white">
-            </div>
-            <div>
-              <label for="role" class="block text-gray-300 font-semibold mb-2">Rôle</label>
-              <input type="text" id="role" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white">
-            </div>
-            <div>
-              <label for="miscInfo" class="block text-gray-300 font-semibold mb-2">Informations diverses :</label>
-              <textarea id="miscInfo" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" rows="3"></textarea>
-            </div>
+      <h2 class="text-4xl font-bold text-center mb-12 text-white" id="memberName">Détails Membre</h2>
+      <div class="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg">
+        <div class="flex flex-col md:flex-row">
+          <div class="md:w-1/2 mb-8 md:mb-0">
+            <video controls class="w-full h-64 rounded-lg" id="memberVideo">
+              <source src="" type="video/mp4">
+            </video>
           </div>
-          <button id="saveDetails" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full mt-6">Sauvegarder</button>
+          <div class="md:w-1/2 md:pl-8">
+            <div class="mb-4">
+              <label class="block text-gray-300 font-semibold mb-2">Race</label>
+              <input type="text" id="race" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="Race">
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-300 font-semibold mb-2">Âge</label>
+              <input type="text" id="age" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="Âge">
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-300 font-semibold mb-2">Origine</label>
+              <input type="text" id="origin" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="Origine">
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-300 font-semibold mb-2">Rôle</label>
+              <input type="text" id="role" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="Rôle">
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-300 font-semibold mb-2">Nombre de missions</label>
+              <input type="number" id="missionCount" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" readonly>
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-300 font-semibold mb-2">Informations diverses</label>
+              <textarea id="miscInfo" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" rows="4" placeholder="Informations diverses"></textarea>
+            </div>
+            <button id="saveDetails" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Enregistrer</button>
+          </div>
         </div>
-      </div>
-      <div class="mt-8 max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg">
-        <h3 class="text-2xl font-semibold mb-4 text-red-600">Progression des Missions</h3>
-        <progress id="missionProgress" class="w-full h-4 bg-gray-700" value="0" max="100"></progress>
-        <p class="text-gray-300 mt-2" id="missionCount">Missions complétées : 0</p>
-        <div class="mt-4">
-          <h4 class="text-xl font-semibold mb-2 text-red-600">Décoration et Récompense</h4>
-          <button id="openDecorationModal" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full mb-4">Ajouter une Décoration</button>
-          <div id="decorations" class="decorations-container">
+        <div class="mt-8" id="adminSection">
+          <h3 class="text-2xl font-semibold mb-4 text-red-600">Ajouter une Décoration</h3>
+          <input type="text" id="newDecoration" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-4 text-white" placeholder="Nom de la décoration (ex. medaille-pyro.png)">
+          <button id="addDecoration" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Ajouter</button>
+          <div id="decorationList" class="mt-4 space-y-4">
             <!-- Decorations will be dynamically added here -->
           </div>
         </div>
       </div>
     </div>
   </section>
-
-  <!-- Modal for adding decorations -->
-  <div id="decorationModal" class="modal">
-    <div class="modal-content sci-fi-effect">
-      <span class="close">&times;</span>
-      <h3 class="text-xl font-semibold mb-4 text-red-600">Ajouter une Décoration</h3>
-      <input type="text" id="newDecorationName" placeholder="Nom de la décoration (ex. Médaille de Pyro)">
-      <textarea id="newDecorationDesc" placeholder="Description de la décoration" rows="3"></textarea>
-      <input type="text" id="newDecorationImg" placeholder="Chemin de l'image (ex. images/medaille-pyro.png)">
-      <button id="addDecoration">Ajouter</button>
-    </div>
-  </div>
 
   <!-- Footer -->
   <footer class="bg-gray-900 text-gray-400 py-6 border-t border-red-600/50">
@@ -268,181 +125,137 @@
   </footer>
 
   <!-- JavaScript -->
-  <script>
-    // Check if user is logged in
-    if (!localStorage.getItem('isLoggedIn')) {
-      window.location.href = 'login.html';
-    }
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+    import { getFirestore, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+    import { firebaseConfig } from './firebase-config.js';
 
-    // Logout
-    document.getElementById('logout').addEventListener('click', function() {
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('isAdmin');
-      window.location.href = 'index.html';
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    onAuthStateChanged(auth, user => {
+      if (!user) {
+        window.location.href = 'login.html';
+      } else {
+        user.getIdTokenResult().then(idTokenResult => {
+          const isAdmin = idTokenResult.claims.isAdmin || false;
+          localStorage.setItem('isAdmin', isAdmin.toString());
+          initializePage();
+        });
+      }
     });
 
-    // Get member ID from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const memberId = urlParams.get('id');
-
-    // Check admin status
-    const isAdmin = localStorage.getItem('isAdmin') === 'true';
-    const openDecorationModal = document.getElementById('openDecorationModal');
-    const decorationModal = document.getElementById('decorationModal');
-    const closeModal = document.querySelector('.modal .close');
-
-    // Show/hide admin controls
-    if (!isAdmin) {
-      openDecorationModal.style.display = 'none';
-    }
-
-    // Load members from localStorage
-    let members = JSON.parse(localStorage.getItem('noxMembers')) || [];
-
-    if (memberId && members[memberId]) {
-      const member = members[memberId];
-      document.getElementById('memberName').textContent = member.name;
-      document.getElementById('memberVideo').querySelector('source').src = member.video;
-      document.getElementById('memberVideo').load();
-      document.getElementById('race').value = member.race || '';
-      document.getElementById('age').value = member.age || '';
-      document.getElementById('origin').value = member.origin || '';
-      document.getElementById('role').value = member.role || '';
-      document.getElementById('miscInfo').value = member.miscInfo || '';
-      document.getElementById('missionProgress').value = member.missionCount || 0;
-      document.getElementById('missionCount').textContent = `Missions complétées : ${member.missionCount || 0}`;
-
-      // Display decorations
-      const decorationsContainer = document.getElementById('decorations');
-      decorationsContainer.innerHTML = '';
-      (member.decorations || []).forEach((decoration, index) => {
-        const decorationItem = document.createElement('div');
-        decorationItem.className = 'decoration-item';
-        decorationItem.innerHTML = `
-          <a href="members-decoration-detail.html?memberId=${memberId}&decorationId=${index}">
-            <img src="${decoration.img}" alt="${decoration.name}">
-          </a>
-          <button class="delete-decoration" data-index="${index}" ${!isAdmin ? 'style="display:none;"' : ''}>X</button>
-        `;
-        decorationsContainer.appendChild(decorationItem);
+    document.getElementById('logout').addEventListener('click', () => {
+      signOut(auth).then(() => {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('isAdmin');
+        window.location.href = 'index.html';
       });
+    });
 
-      // Add event listeners to delete buttons
-      document.querySelectorAll('.delete-decoration').forEach(button => {
-        button.addEventListener('click', function() {
-          const index = this.dataset.index;
-          if (confirm('Supprimer cette décoration ?')) {
-            members[memberId].decorations.splice(index, 1);
-            localStorage.setItem('noxMembers', JSON.stringify(members));
-            decorationsContainer.innerHTML = '';
-            members[memberId].decorations.forEach((decoration, index) => {
-              const decorationItem = document.createElement('div');
-              decorationItem.className = 'decoration-item';
-              decorationItem.innerHTML = `
-                <a href="members-decoration-detail.html?memberId=${memberId}&decorationId=${index}">
-                  <img src="${decoration.img}" alt="${decoration.name}">
-                </a>
-                <button class="delete-decoration" data-index="${index}" ${!isAdmin ? 'style="display:none;"' : ''}>X</button>
-              `;
-              decorationsContainer.appendChild(decorationItem);
+    async function initializePage() {
+      const isAdmin = localStorage.getItem('isAdmin') === 'true';
+      const urlParams = new URLSearchParams(window.location.search);
+      const memberId = urlParams.get('id');
+
+      if (!memberId) {
+        window.location.href = 'members-hr.html';
+        return;
+      }
+
+      const adminSection = document.getElementById('adminSection');
+      if (!isAdmin) {
+        adminSection.style.display = 'none';
+      }
+
+      const memberName = document.getElementById('memberName');
+      const memberVideo = document.getElementById('memberVideo');
+      const race = document.getElementById('race');
+      const age = document.getElementById('age');
+      const origin = document.getElementById('origin');
+      const role = document.getElementById('role');
+      const missionCount = document.getElementById('missionCount');
+      const miscInfo = document.getElementById('miscInfo');
+      const saveDetails = document.getElementById('saveDetails');
+      const newDecoration = document.getElementById('newDecoration');
+      const addDecoration = document.getElementById('addDecoration');
+      const decorationList = document.getElementById('decorationList');
+
+      async function loadMember() {
+        const memberDoc = await getDoc(doc(db, 'members', memberId));
+        if (memberDoc.exists()) {
+          const member = memberDoc.data();
+          memberName.textContent = member.name;
+          memberVideo.querySelector('source').src = member.video;
+          memberVideo.load();
+          race.value = member.race || '';
+          age.value = member.age || '';
+          origin.value = member.origin || '';
+          role.value = member.role || '';
+          missionCount.value = member.missionCount || 0;
+          miscInfo.value = member.miscInfo || '';
+
+          decorationList.innerHTML = '';
+          (member.decorations || []).forEach((decoration, index) => {
+            const decorationDiv = document.createElement('div');
+            decorationDiv.className = 'bg-gray-700 p-4 rounded-lg flex justify-between items-center';
+            decorationDiv.innerHTML = `
+              <span class="text-red-500">${decoration}</span>
+              <button class="deleteDecoration bg-red-600 text-white px-3 py-1 rounded-full text-sm hover:bg-red-500" data-index="${index}" ${!isAdmin ? 'style="display:none;"' : ''}>Supprimer</button>
+            `;
+            decorationList.appendChild(decorationDiv);
+          });
+
+          document.querySelectorAll('.deleteDecoration').forEach(button => {
+            button.addEventListener('click', async function() {
+              const index = parseInt(this.dataset.index);
+              const updatedDecorations = member.decorations.filter((_, i) => i !== index);
+              await updateDoc(doc(db, 'members', memberId), { decorations: updatedDecorations });
+              loadMember();
             });
+          });
+        } else {
+          window.location.href = 'members-hr.html';
+        }
+      }
+
+      if (isAdmin) {
+        saveDetails.addEventListener('click', async () => {
+          try {
+            await updateDoc(doc(db, 'members', memberId), {
+              race: race.value.trim(),
+              age: age.value.trim(),
+              origin: origin.value.trim(),
+              role: role.value.trim(),
+              miscInfo: miscInfo.value.trim()
+            });
+            alert('Détails enregistrés.');
+          } catch (error) {
+            console.error('Erreur lors de l\'enregistrement des détails :', error);
+            alert('Erreur lors de l\'enregistrement. Vérifiez la console.');
           }
         });
-      });
-    } else {
-      window.location.href = 'members-hr.html';
-    }
 
-    // Save details
-    document.getElementById('saveDetails').addEventListener('click', function() {
-      members[memberId].race = document.getElementById('race').value;
-      members[memberId].age = document.getElementById('age').value;
-      members[memberId].origin = document.getElementById('origin').value;
-      members[memberId].role = document.getElementById('role').value;
-      members[memberId].miscInfo = document.getElementById('miscInfo').value;
-      localStorage.setItem('noxMembers', JSON.stringify(members));
-      alert('Détails sauvegardés !');
-    });
-
-    // Modal functionality
-    openDecorationModal.addEventListener('click', function() {
-      if (isAdmin) {
-        decorationModal.style.display = 'flex';
-      }
-    });
-
-    closeModal.addEventListener('click', function() {
-      decorationModal.style.display = 'none';
-    });
-
-    window.addEventListener('click', function(event) {
-      if (event.target === decorationModal) {
-        decorationModal.style.display = 'none';
-      }
-    });
-
-    // Add decoration
-    document.getElementById('addDecoration').addEventListener('click', function() {
-      const newDecorationName = document.getElementById('newDecorationName').value.trim();
-      const newDecorationDesc = document.getElementById('newDecorationDesc').value.trim();
-      const newDecorationImg = document.getElementById('newDecorationImg').value.trim();
-      if (newDecorationName && newDecorationImg) {
-        if (!members[memberId].decorations) {
-          members[memberId].decorations = [];
-        }
-        members[memberId].decorations.push({
-          name: newDecorationName,
-          desc: newDecorationDesc,
-          img: newDecorationImg
+        addDecoration.addEventListener('click', async () => {
+          if (newDecoration.value.trim()) {
+            const memberDoc = await getDoc(doc(db, 'members', memberId));
+            const member = memberDoc.data();
+            const updatedDecorations = [...(member.decorations || []), newDecoration.value.trim()];
+            await updateDoc(doc(db, 'members', memberId), { decorations: updatedDecorations });
+            newDecoration.value = '';
+            loadMember();
+          } else {
+            alert('Veuillez saisir un nom de décoration.');
+          }
         });
-        localStorage.setItem('noxMembers', JSON.stringify(members));
-        document.getElementById('newDecorationName').value = '';
-        document.getElementById('newDecorationDesc').value = '';
-        document.getElementById('newDecorationImg').value = '';
-
-        // Refresh decorations
-        const decorationsContainer = document.getElementById('decorations');
-        decorationsContainer.innerHTML = '';
-        members[memberId].decorations.forEach((decoration, index) => {
-          const decorationItem = document.createElement('div');
-          decorationItem.className = 'decoration-item';
-          decorationItem.innerHTML = `
-            <a href="members-decoration-detail.html?memberId=${memberId}&decorationId=${index}">
-              <img src="${decoration.img}" alt="${decoration.name}">
-            </a>
-            <button class="delete-decoration" data-index="${index}" ${!isAdmin ? 'style="display:none;"' : ''}>X</button>
-          `;
-          decorationsContainer.appendChild(decorationItem);
-        });
-
-        // Re-attach delete button listeners
-        document.querySelectorAll('.delete-decoration').forEach(button => {
-          button.addEventListener('click', function() {
-            const index = this.dataset.index;
-            if (confirm('Supprimer cette décoration ?')) {
-              members[memberId].decorations.splice(index, 1);
-              localStorage.setItem('noxMembers', JSON.stringify(members));
-              decorationsContainer.innerHTML = '';
-              members[memberId].decorations.forEach((decoration, index) => {
-                const decorationItem = document.createElement('div');
-                decorationItem.className = 'decoration-item';
-                decorationItem.innerHTML = `
-                  <a href="members-decoration-detail.html?memberId=${memberId}&decorationId=${index}">
-                    <img src="${decoration.img}" alt="${decoration.name}">
-                  </a>
-                  <button class="delete-decoration" data-index="${index}" ${!isAdmin ? 'style="display:none;"' : ''}>X</button>
-                `;
-                decorationsContainer.appendChild(decorationItem);
-              });
-            }
-          });
-        });
-
-        decorationModal.style.display = 'none';
       } else {
-        alert('Veuillez saisir au moins un nom et un chemin d\'image.');
+        saveDetails.style.display = 'none';
       }
-    });
+
+      loadMember();
+    }
   </script>
 </body>
 </html>

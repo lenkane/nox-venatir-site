@@ -43,7 +43,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NOX VENATIR - Missions</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="output.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Orbitron', sans-serif; }
@@ -95,110 +95,133 @@
   </footer>
 
   <!-- JavaScript -->
-  <script>
-    // Check if user is logged in
-    if (!localStorage.getItem('isLoggedIn')) {
-      window.location.href = 'login.html';
-    }
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+    import { getFirestore, collection, getDocs, addDoc, doc, getDoc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+    import { firebaseConfig } from './firebase-config.js';
 
-    // Logout
-    document.getElementById('logout').addEventListener('click', function() {
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('isAdmin');
-      window.location.href = 'index.html';
-    });
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    // Check admin status
-    const isAdmin = localStorage.getItem('isAdmin') === 'true';
-
-    // Missions functionality
-    const missionName = document.getElementById('missionName');
-    const participantCheckboxes = document.getElementById('participantCheckboxes');
-    const missionReport = document.getElementById('missionReport');
-    const missionList = document.getElementById('missionList');
-    const submitMission = document.getElementById('submitMission');
-
-    // Load members from localStorage for participants
-    let members = JSON.parse(localStorage.getItem('noxMembers')) || [];
-
-    // Populate participant checkboxes
-    members.forEach((member, index) => {
-      const label = document.createElement('label');
-      label.className = 'flex items-center space-x-2 text-gray-300';
-      label.innerHTML = `
-        <input type="checkbox" value="${index}" class="form-checkbox h-5 w-5 text-red-600 bg-gray-700 border-red-600/50">
-        <span>${member.name}</span>
-      `;
-      participantCheckboxes.appendChild(label);
-    });
-
-    // Load existing missions from localStorage
-    let missions = JSON.parse(localStorage.getItem('noxMissions')) || [];
-
-    // Display missions
-    function displayMissions() {
-      missionList.innerHTML = '';
-      missions.forEach((mission, index) => {
-        const missionDiv = document.createElement('div');
-        missionDiv.className = 'bg-gray-800 p-4 rounded-lg flex justify-between items-start';
-        missionDiv.innerHTML = `
-          <div>
-            <h4 class="text-xl font-semibold text-red-600">${mission.name}</h4>
-            <p class="text-gray-400 mb-2">Participants: ${mission.participants.map(i => members[i].name).join(', ')}</p>
-            <p class="text-gray-300">${mission.report}</p>
-          </div>
-          <button class="deleteMission bg-red-600 text-white px-3 py-1 rounded-full text-sm hover:bg-red-500" data-index="${index}" ${!isAdmin ? 'style="display:none;"' : ''}>Supprimer</button>
-        `;
-        missionList.appendChild(missionDiv);
-      });
-
-      // Add event listeners to delete buttons
-      document.querySelectorAll('.deleteMission').forEach(button => {
-        button.addEventListener('click', function() {
-          const index = this.dataset.index;
-          if (confirm('Supprimer cette mission ?')) {
-            // Decrement mission count for participants
-            missions[index].participants.forEach(participantIndex => {
-              members[participantIndex].missionCount = (members[participantIndex].missionCount || 0) - 1;
-            });
-            localStorage.setItem('noxMembers', JSON.stringify(members));
-
-            missions.splice(index, 1);
-            localStorage.setItem('noxMissions', JSON.stringify(missions));
-            displayMissions();
-          }
-        });
-      });
-    }
-
-    // Add new mission
-    submitMission.addEventListener('click', function() {
-      const selectedParticipants = Array.from(participantCheckboxes.querySelectorAll('input:checked')).map(checkbox => parseInt(checkbox.value));
-      if (missionName.value.trim() && selectedParticipants.length > 0 && missionReport.value.trim()) {
-        missions.push({
-          name: missionName.value.trim(),
-          participants: selectedParticipants,
-          report: missionReport.value.trim()
-        });
-        localStorage.setItem('noxMissions', JSON.stringify(missions));
-
-        // Update member mission counts
-        selectedParticipants.forEach(index => {
-          members[index].missionCount = (members[index].missionCount || 0) + 1;
-        });
-        localStorage.setItem('noxMembers', JSON.stringify(members));
-
-        missionName.value = '';
-        missionReport.value = '';
-        participantCheckboxes.querySelectorAll('input:checked').forEach(checkbox => checkbox.checked = false);
-        displayMissions();
+    onAuthStateChanged(auth, user => {
+      if (!user) {
+        window.location.href = 'login.html';
       } else {
-        alert('Veuillez remplir tous les champs.');
+        user.getIdTokenResult().then(idTokenResult => {
+          const isAdmin = idTokenResult.claims.isAdmin || false;
+          localStorage.setItem('isAdmin', isAdmin.toString());
+          initializePage();
+        });
       }
     });
 
-    // Initial display
-    displayMissions();
+    document.getElementById('logout').addEventListener('click', () => {
+      signOut(auth).then(() => {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('isAdmin');
+        window.location.href = 'index.html';
+      });
+    });
+
+    async function initializePage() {
+      const isAdmin = localStorage.getItem('isAdmin') === 'true';
+      const missionName = document.getElementById('missionName');
+      const participantCheckboxes = document.getElementById('participantCheckboxes');
+      const missionReport = document.getElementById('missionReport');
+      const missionList = document.getElementById('missionList');
+      const submitMission = document.getElementById('submitMission');
+
+      async function loadMembers() {
+        participantCheckboxes.innerHTML = '';
+        const membersSnapshot = await getDocs(collection(db, 'members'));
+        const members = [];
+        membersSnapshot.forEach(doc => {
+          members.push({ id: doc.id, ...doc.data() });
+          const label = document.createElement('label');
+          label.className = 'flex items-center space-x-2 text-gray-300';
+          label.innerHTML = `
+            <input type="checkbox" value="${doc.id}" class="form-checkbox h-5 w-5 text-red-600 bg-gray-700 border-red-600/50">
+            <span>${doc.data().name}</span>
+          `;
+          participantCheckboxes.appendChild(label);
+        });
+        return members;
+      }
+
+      async function displayMissions() {
+        missionList.innerHTML = '';
+        const members = await loadMembers();
+        const missionsSnapshot = await getDocs(collection(db, 'missions'));
+        missionsSnapshot.forEach(doc => {
+          const mission = { id: doc.id, ...doc.data() };
+          const missionDiv = document.createElement('div');
+          missionDiv.className = 'bg-gray-800 p-4 rounded-lg flex justify-between items-start';
+          missionDiv.innerHTML = `
+            <div>
+              <h4 class="text-xl font-semibold text-red-600">${mission.name}</h4>
+              <p class="text-gray-400 mb-2">Participants: ${mission.participants.map(id => members.find(m => m.id === id)?.name || 'Inconnu').join(', ')}</p>
+              <p class="text-gray-300">${mission.report}</p>
+            </div>
+            <button class="deleteMission bg-red-600 text-white px-3 py-1 rounded-full text-sm hover:bg-red-500" data-id="${doc.id}" ${!isAdmin ? 'style="display:none;"' : ''}>Supprimer</button>
+          `;
+          missionList.appendChild(missionDiv);
+        });
+
+        document.querySelectorAll('.deleteMission').forEach(button => {
+          button.addEventListener('click', async function() {
+            const id = this.dataset.id;
+            if (confirm('Supprimer cette mission ?')) {
+              const missionDoc = await getDoc(doc(db, 'missions', id));
+              const mission = missionDoc.data();
+              for (const participantId of mission.participants) {
+                const memberRef = doc(db, 'members', participantId);
+                const memberDoc = await getDoc(memberRef);
+                const member = memberDoc.data();
+                await updateDoc(memberRef, {
+                  missionCount: (member.missionCount || 0) - 1
+                });
+              }
+              await deleteDoc(doc(db, 'missions', id));
+              displayMissions();
+            }
+          });
+        });
+      }
+
+      submitMission.addEventListener('click', async () => {
+        const selectedParticipants = Array.from(participantCheckboxes.querySelectorAll('input:checked')).map(checkbox => checkbox.value);
+        if (missionName.value.trim() && selectedParticipants.length > 0 && missionReport.value.trim()) {
+          try {
+            await addDoc(collection(db, 'missions'), {
+              name: missionName.value.trim(),
+              participants: selectedParticipants,
+              report: missionReport.value.trim()
+            });
+            for (const participantId of selectedParticipants) {
+              const memberRef = doc(db, 'members', participantId);
+              const memberDoc = await getDoc(memberRef);
+              const member = memberDoc.data();
+              await updateDoc(memberRef, {
+                missionCount: (member.missionCount || 0) + 1
+              });
+            }
+            missionName.value = '';
+            missionReport.value = '';
+            participantCheckboxes.querySelectorAll('input:checked').forEach(checkbox => checkbox.checked = false);
+            displayMissions();
+          } catch (error) {
+            console.error('Erreur lors de l\'ajout de la mission :', error);
+            alert('Erreur lors de l\'ajout de la mission. Vérifiez la console.');
+          }
+        } else {
+          alert('Veuillez remplir tous les champs.');
+        }
+      });
+
+      displayMissions();
+    }
   </script>
 </body>
 </html>

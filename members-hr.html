@@ -43,7 +43,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NOX VENATIR - Fiche RH</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="output.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Orbitron', sans-serif; }
@@ -95,90 +95,103 @@
   </footer>
 
   <!-- JavaScript -->
-  <script>
-    // Check if user is logged in
-    if (!localStorage.getItem('isLoggedIn')) {
-      window.location.href = 'login.html';
-    }
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+    import { getFirestore, collection, getDocs, addDoc, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+    import { firebaseConfig } from './firebase-config.js';
 
-    // Logout
-    document.getElementById('logout').addEventListener('click', function() {
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('isAdmin');
-      window.location.href = 'index.html';
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    onAuthStateChanged(auth, user => {
+      if (!user) {
+        window.location.href = 'login.html';
+      } else {
+        user.getIdTokenResult().then(idTokenResult => {
+          const isAdmin = idTokenResult.claims.isAdmin || false;
+          localStorage.setItem('isAdmin', isAdmin.toString());
+          initializePage();
+        });
+      }
     });
 
-    // Check admin status
-    const isAdmin = localStorage.getItem('isAdmin') === 'true';
-    const addMemberSection = document.getElementById('addMemberSection');
-
-    // Hide add member section for non-admins
-    if (!isAdmin) {
-      addMemberSection.style.display = 'none';
-    }
-
-    // HR functionality
-    const newMemberName = document.getElementById('newMemberName');
-    const newMemberVideo = document.getElementById('newMemberVideo');
-    const memberList = document.getElementById('memberList');
-    const addMember = document.getElementById('addMember');
-
-    // Load existing members from localStorage
-    let members = JSON.parse(localStorage.getItem('noxMembers')) || [];
-
-    // Display members
-    function displayMembers() {
-      memberList.innerHTML = '';
-      members.forEach((member, index) => {
-        const memberDiv = document.createElement('div');
-        memberDiv.className = 'bg-gray-700 p-4 rounded-lg flex justify-between items-center';
-        memberDiv.innerHTML = `
-          <a href="members-hr-detail.html?id=${index}" class="text-red-500 hover:underline text-xl font-semibold">${member.name}</a>
-          <button class="deleteMember bg-red-600 text-white px-3 py-1 rounded-full text-sm hover:bg-red-500" data-index="${index}" ${!isAdmin ? 'style="display:none;"' : ''}>Supprimer</button>
-        `;
-        memberList.appendChild(memberDiv);
+    document.getElementById('logout').addEventListener('click', () => {
+      signOut(auth).then(() => {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('isAdmin');
+        window.location.href = 'index.html';
       });
+    });
 
-      // Add event listeners to delete buttons
-      document.querySelectorAll('.deleteMember').forEach(button => {
-        button.addEventListener('click', function() {
-          const index = this.dataset.index;
-          if (confirm('Supprimer ce membre ?')) {
-            members.splice(index, 1);
-            localStorage.setItem('noxMembers', JSON.stringify(members));
-            displayMembers();
+    async function initializePage() {
+      const isAdmin = localStorage.getItem('isAdmin') === 'true';
+      const addMemberSection = document.getElementById('addMemberSection');
+      if (!isAdmin) {
+        addMemberSection.style.display = 'none';
+      }
+
+      const newMemberName = document.getElementById('newMemberName');
+      const newMemberVideo = document.getElementById('newMemberVideo');
+      const memberList = document.getElementById('memberList');
+      const addMember = document.getElementById('addMember');
+
+      async function displayMembers() {
+        memberList.innerHTML = '';
+        const membersSnapshot = await getDocs(collection(db, 'members'));
+        membersSnapshot.forEach(doc => {
+          const member = { id: doc.id, ...doc.data() };
+          const memberDiv = document.createElement('div');
+          memberDiv.className = 'bg-gray-700 p-4 rounded-lg flex justify-between items-center';
+          memberDiv.innerHTML = `
+            <a href="members-hr-detail.html?id=${doc.id}" class="text-red-500 hover:underline text-xl font-semibold">${member.name}</a>
+            <button class="deleteMember bg-red-600 text-white px-3 py-1 rounded-full text-sm hover:bg-red-500" data-id="${doc.id}" ${!isAdmin ? 'style="display:none;"' : ''}>Supprimer</button>
+          `;
+          memberList.appendChild(memberDiv);
+        });
+
+        document.querySelectorAll('.deleteMember').forEach(button => {
+          button.addEventListener('click', async function() {
+            const id = this.dataset.id;
+            if (confirm('Supprimer ce membre ?')) {
+              await deleteDoc(doc(db, 'members', id));
+              displayMembers();
+            }
+          });
+        });
+      }
+
+      if (isAdmin) {
+        addMember.addEventListener('click', async () => {
+          if (newMemberName.value.trim() && newMemberVideo.value.trim()) {
+            try {
+              await addDoc(collection(db, 'members'), {
+                name: newMemberName.value.trim(),
+                video: newMemberVideo.value.trim(),
+                race: '',
+                age: '',
+                origin: '',
+                role: '',
+                missionCount: 0,
+                miscInfo: '',
+                decorations: []
+              });
+              newMemberName.value = '';
+              newMemberVideo.value = '';
+              displayMembers();
+            } catch (error) {
+              console.error('Erreur lors de l\'ajout du membre :', error);
+              alert('Erreur lors de l\'ajout du membre. Vérifiez la console.');
+            }
+          } else {
+            alert('Veuillez saisir un nom et un chemin de vidéo.');
           }
         });
-      });
-    }
+      }
 
-    // Add new member
-    if (isAdmin) {
-      addMember.addEventListener('click', function() {
-        if (newMemberName.value.trim() && newMemberVideo.value.trim()) {
-          members.push({
-            name: newMemberName.value.trim(),
-            video: newMemberVideo.value.trim(),
-            race: '',
-            age: '',
-            origin: '',
-            role: '',
-            missionCount: 0,
-            miscInfo: '',
-            decorations: ''
-          });
-          localStorage.setItem('noxMembers', JSON.stringify(members));
-          newMemberName.value = '';
-          newMemberVideo.value = '';
-          displayMembers();
-        } else {
-          alert('Veuillez saisir un nom et un chemin de vidéo.');
-        }
-      });
+      displayMembers();
     }
-
-    // Initial display
-    displayMembers();
   </script>
 </body>
 </html>
