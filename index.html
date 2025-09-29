@@ -43,7 +43,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NOX VENATIR - Accueil</title>
+<<<<<<< HEAD
   <link href="output.css" rel="stylesheet">
+=======
+  <script src="https://cdn.tailwindcss.com"></script>
+>>>>>>> 1595cb0a14c7c75a674a40cfe8ed7b2bd92251de
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Orbitron', sans-serif; }
@@ -81,6 +85,7 @@
     </div>
   </section>
 
+<<<<<<< HEAD
   <!-- Presentation Section -->
   <section class="bg-gray-900 py-20">
     <div class="container mx-auto">
@@ -115,10 +120,12 @@
     </div>
   </section>
 
+=======
+>>>>>>> 1595cb0a14c7c75a674a40cfe8ed7b2bd92251de
   <!-- Footer -->
   <footer class="bg-gray-900 text-gray-400 py-6 border-t border-red-600/50">
     <div class="container mx-auto text-center">
-      <p>&copy; 2955 NOX VENATIR. Tous droits réservés. Hunt the stars, citizen.</p>
+      <p>&copy; 2955 NOX VENATIR. Tous droits réservés.</p>
     </div>
   </footer>
 
@@ -131,10 +138,20 @@
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
 
+<<<<<<< HEAD
     onAuthStateChanged(auth, user => {
       if (user) {
         window.location.href = 'members-home.html';
       }
+=======
+    // Check authentication state
+    onAuthStateChanged(auth, user => {
+      if (user) {
+        // User is logged in, redirect to members-home
+        window.location.href = 'members-home.html';
+      }
+      // If not logged in, stay on index.html
+>>>>>>> 1595cb0a14c7c75a674a40cfe8ed7b2bd92251de
     });
   </script>
 </body>

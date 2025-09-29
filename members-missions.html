@@ -45,6 +45,10 @@
   <title>NOX VENATIR - Missions</title>
   <link href="output.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
+  <script src="firebase-config.js"></script>
   <style>
     body { font-family: 'Orbitron', sans-serif; }
     .bg-members { background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('images/banner.gif'); background-size: cover; background-position: center; }
@@ -95,6 +99,7 @@
   </footer>
 
   <!-- JavaScript -->
+<<<<<<< HEAD
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
@@ -106,6 +111,11 @@
     const db = getFirestore(app);
 
     onAuthStateChanged(auth, user => {
+=======
+  <script>
+    // Check if user is logged in
+    firebase.auth().onAuthStateChanged(user => {
+>>>>>>> 1595cb0a14c7c75a674a40cfe8ed7b2bd92251de
       if (!user) {
         window.location.href = 'login.html';
       } else {
@@ -117,25 +127,46 @@
       }
     });
 
+<<<<<<< HEAD
     document.getElementById('logout').addEventListener('click', () => {
       signOut(auth).then(() => {
+=======
+    // Logout
+    document.getElementById('logout').addEventListener('click', function() {
+      firebase.auth().signOut().then(() => {
+>>>>>>> 1595cb0a14c7c75a674a40cfe8ed7b2bd92251de
         localStorage.removeItem('isLoggedIn');
         localStorage.removeItem('isAdmin');
         window.location.href = 'index.html';
       });
     });
 
+<<<<<<< HEAD
     async function initializePage() {
       const isAdmin = localStorage.getItem('isAdmin') === 'true';
+=======
+    function initializePage() {
+      // Check admin status
+      const isAdmin = localStorage.getItem('isAdmin') === 'true';
+
+      // Missions functionality
+>>>>>>> 1595cb0a14c7c75a674a40cfe8ed7b2bd92251de
       const missionName = document.getElementById('missionName');
       const participantCheckboxes = document.getElementById('participantCheckboxes');
       const missionReport = document.getElementById('missionReport');
       const missionList = document.getElementById('missionList');
       const submitMission = document.getElementById('submitMission');
 
+<<<<<<< HEAD
       async function loadMembers() {
         participantCheckboxes.innerHTML = '';
         const membersSnapshot = await getDocs(collection(db, 'members'));
+=======
+      // Load members from Firestore for participants
+      async function loadMembers() {
+        participantCheckboxes.innerHTML = '';
+        const membersSnapshot = await db.collection('members').get();
+>>>>>>> 1595cb0a14c7c75a674a40cfe8ed7b2bd92251de
         const members = [];
         membersSnapshot.forEach(doc => {
           members.push({ id: doc.id, ...doc.data() });
@@ -150,10 +181,18 @@
         return members;
       }
 
+<<<<<<< HEAD
       async function displayMissions() {
         missionList.innerHTML = '';
         const members = await loadMembers();
         const missionsSnapshot = await getDocs(collection(db, 'missions'));
+=======
+      // Load missions from Firestore
+      async function displayMissions() {
+        missionList.innerHTML = '';
+        const members = await loadMembers();
+        const missionsSnapshot = await db.collection('missions').get();
+>>>>>>> 1595cb0a14c7c75a674a40cfe8ed7b2bd92251de
         missionsSnapshot.forEach(doc => {
           const mission = { id: doc.id, ...doc.data() };
           const missionDiv = document.createElement('div');
@@ -169,10 +208,15 @@
           missionList.appendChild(missionDiv);
         });
 
+<<<<<<< HEAD
+=======
+        // Add event listeners to delete buttons
+>>>>>>> 1595cb0a14c7c75a674a40cfe8ed7b2bd92251de
         document.querySelectorAll('.deleteMission').forEach(button => {
           button.addEventListener('click', async function() {
             const id = this.dataset.id;
             if (confirm('Supprimer cette mission ?')) {
+<<<<<<< HEAD
               const missionDoc = await getDoc(doc(db, 'missions', id));
               const mission = missionDoc.data();
               for (const participantId of mission.participants) {
@@ -184,26 +228,53 @@
                 });
               }
               await deleteDoc(doc(db, 'missions', id));
+=======
+              const missionDoc = await db.collection('missions').doc(id).get();
+              const mission = missionDoc.data();
+              for (const participantId of mission.participants) {
+                const memberDoc = await db.collection('members').doc(participantId).get();
+                const member = memberDoc.data();
+                await db.collection('members').doc(participantId).update({
+                  missionCount: (member.missionCount || 0) - 1
+                });
+              }
+              await db.collection('missions').doc(id).delete();
+>>>>>>> 1595cb0a14c7c75a674a40cfe8ed7b2bd92251de
               displayMissions();
             }
           });
         });
       }
 
+<<<<<<< HEAD
       submitMission.addEventListener('click', async () => {
         const selectedParticipants = Array.from(participantCheckboxes.querySelectorAll('input:checked')).map(checkbox => checkbox.value);
         if (missionName.value.trim() && selectedParticipants.length > 0 && missionReport.value.trim()) {
           try {
             await addDoc(collection(db, 'missions'), {
+=======
+      // Add new mission
+      submitMission.addEventListener('click', async function() {
+        const selectedParticipants = Array.from(participantCheckboxes.querySelectorAll('input:checked')).map(checkbox => checkbox.value);
+        if (missionName.value.trim() && selectedParticipants.length > 0 && missionReport.value.trim()) {
+          try {
+            await db.collection('missions').add({
+>>>>>>> 1595cb0a14c7c75a674a40cfe8ed7b2bd92251de
               name: missionName.value.trim(),
               participants: selectedParticipants,
               report: missionReport.value.trim()
             });
             for (const participantId of selectedParticipants) {
+<<<<<<< HEAD
               const memberRef = doc(db, 'members', participantId);
               const memberDoc = await getDoc(memberRef);
               const member = memberDoc.data();
               await updateDoc(memberRef, {
+=======
+              const memberDoc = await db.collection('members').doc(participantId).get();
+              const member = memberDoc.data();
+              await db.collection('members').doc(participantId).update({
+>>>>>>> 1595cb0a14c7c75a674a40cfe8ed7b2bd92251de
                 missionCount: (member.missionCount || 0) + 1
               });
             }
@@ -220,6 +291,10 @@
         }
       });
 
+<<<<<<< HEAD
+=======
+      // Initial display
+>>>>>>> 1595cb0a14c7c75a674a40cfe8ed7b2bd92251de
       displayMissions();
     }
   </script>
