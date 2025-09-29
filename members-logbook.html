@@ -43,13 +43,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NOX VENATIR - Journal de bord</title>
-  <link href="output.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
-  <script src="firebase-config.js"></script>
-  <style>
   <style>
     body { font-family: 'Orbitron', sans-serif; }
     .bg-members { background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('images/banner.gif'); background-size: cover; background-position: center; }
@@ -78,11 +73,11 @@
       <div class="max-w-2xl mx-auto">
         <div class="bg-gray-800 p-8 rounded-lg mb-8">
           <h3 class="text-2xl font-semibold mb-4 text-red-600">Nouvelle Entrée</h3>
-          <textarea id="logEntry" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-4 text-white" rows="5" placeholder="Écrire une entrée dans le journal de bord"></textarea>
-          <button id="submitLog" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Ajouter l'Entrée</button>
+          <textarea id="logEntry" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-4 text-white" rows="5" placeholder="Saisissez votre entrée dans le journal..."></textarea>
+          <button id="submitLog" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Ajouter au Journal</button>
         </div>
         <div id="logList" class="space-y-4">
-          <!-- Log entries will be dynamically added here -->
+          <!-- Entries will be dynamically added here -->
         </div>
       </div>
     </div>
