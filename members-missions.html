@@ -49,7 +49,7 @@
     body { font-family: 'Orbitron', sans-serif; }
     .bg-members { background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('images/banner.gif'); background-size: cover; background-position: center; }
     .mission-image { max-width: 150px; max-height: 150px; border-radius: 0.25rem; }
-    .image-preview { max-width: 100%; height: 192px; object-fit: cover; border-radius: 0.25rem; }
+    .image-preview { width: 100%; height: 200px; object-fit: cover; border-radius: 0.25rem; }
   </style>
 </head>
 <body class="bg-black text-white">
@@ -72,32 +72,34 @@
   <section class="bg-members py-20">
     <div class="container mx-auto">
       <h2 class="text-4xl font-bold text-center mb-12 text-white">Missions NOX VENATIR</h2>
-      <div class="max-w-4xl mx-auto">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <!-- Left: Image Section -->
-          <div class="bg-gray-800 p-8 rounded-lg">
-            <h3 class="text-2xl font-semibold mb-4 text-red-600">Image de la mission</h3>
-            <div class="mb-4">
-              <label class="block text-gray-300 font-semibold mb-2">URL de l'image (optionnel)</label>
-              <input type="url" id="missionImageUrl" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="https://example.com/mission-image.jpg">
+      <div class="max-w-6xl mx-auto">
+        <!-- New Mission Frame with Image on Left -->
+        <div class="bg-gray-800 rounded-lg mb-8">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
+            <!-- Left: Image Preview -->
+            <div class="flex flex-col items-center">
+              <h3 class="text-xl font-semibold mb-4 text-red-600 text-center">Image de la mission</h3>
+              <div class="mb-4">
+                <label class="block text-gray-300 font-semibold mb-2">URL de l'image (optionnel)</label>
+                <input type="url" id="missionImageUrl" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="https://example.com/mission-image.jpg">
+              </div>
+              <div id="imagePreview" class="hidden">
+                <img id="previewImage" src="" alt="Aperçu de l'image" class="image-preview mb-2">
+                <p class="text-gray-400 text-sm text-center">Aperçu de l'image sélectionnée</p>
+              </div>
             </div>
-            <div id="imagePreview" class="hidden">
-              <img id="previewImage" src="" alt="Aperçu de l'image" class="image-preview mb-2">
-              <p class="text-gray-400 text-sm">Aperçu de l'image sélectionnée</p>
+            <!-- Right: Mission Form -->
+            <div>
+              <input type="text" id="missionName" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-4 text-white" placeholder="Nom de la mission">
+              <div id="participantCheckboxes" class="space-y-2 mb-4">
+                <!-- Checkboxes will be dynamically added here -->
+              </div>
+              <textarea id="missionReport" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-4 text-white" rows="5" placeholder="Rapport de la mission"></textarea>
+              <button id="submitMission" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Ajouter la Mission</button>
             </div>
-          </div>
-          <!-- Right: Mission Form -->
-          <div class="bg-gray-800 p-8 rounded-lg">
-            <h3 class="text-2xl font-semibold mb-4 text-red-600">Détails de la mission</h3>
-            <input type="text" id="missionName" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-4 text-white" placeholder="Nom de la mission">
-            <div id="participantCheckboxes" class="space-y-2 mb-4">
-              <!-- Checkboxes will be dynamically added here -->
-            </div>
-            <textarea id="missionReport" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-4 text-white" rows="5" placeholder="Rapport de la mission"></textarea>
-            <button id="submitMission" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Ajouter la Mission</button>
           </div>
         </div>
-        <div id="missionList" class="space-y-4 mt-8">
+        <div id="missionList" class="space-y-4">
           <!-- Missions will be dynamically added here -->
         </div>
       </div>
