@@ -293,16 +293,16 @@
             memberName.textContent = member.name || 'Inconnu';
 
             // Vérifier et charger la vidéo
-            if (member.video && member.video !== '' && member.video !== 'images/fiche_RH/""' && member.video.endsWith('.mp4')) {
-              console.log('Chargement de la vidéo :', member.video);
-              memberVideo.querySelector('source').src = member.video;
-              memberVideo.load();
-              videoError.classList.add('hidden');
-            } else {
-              console.error('Champ vidéo vide ou invalide pour le membre :', memberId, 'Video:', member.video);
-              memberVideo.querySelector('source').src = '';
-              videoError.textContent = `Erreur : Vidéo non disponible pour ${member.name || 'ce membre'}. Vérifiez le chemin dans Firestore.`;
-              videoError.classList.remove('hidden');
+           if (member.video && member.video !== '' && member.video.endsWith('.mp4')) {
+  console.log('Chargement de la vidéo :', member.video);
+  memberVideo.querySelector('source').src = member.video;
+  memberVideo.load();
+  videoError.classList.add('hidden');
+} else {
+  console.error('Champ vidéo vide ou invalide pour le membre :', memberId, 'Video:', member.video);
+  memberVideo.querySelector('source').src = '';
+  videoError.classList.remove('hidden');
+}
             }
 
             race.value = member.race || '';
