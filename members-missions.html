@@ -48,6 +48,21 @@
   <style>
     body { font-family: 'Orbitron', sans-serif; }
     .bg-members { background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('images/banner.gif'); background-size: cover; background-position: center; }
+    .drop-zone {
+      border: 2px dashed #e53e3e;
+      border-radius: 0.5rem;
+      padding: 2rem;
+      text-align: center;
+      background-color: rgba(229, 62, 62, 0.1);
+      transition: border-color 0.3s ease;
+      cursor: pointer;
+    }
+    .drop-zone:hover, .drop-zone.dragover {
+      border-color: #fc8181;
+      background-color: rgba(229, 62, 62, 0.2);
+    }
+    .drop-zone p { color: #e53e3e; font-weight: 500; }
+    .mission-image { max-width: 100px; max-height: 100px; border-radius: 0.25rem; }
   </style>
 </head>
 <body class="bg-black text-white">
@@ -77,6 +92,14 @@
           <div id="participantCheckboxes" class="space-y-2 mb-4">
             <!-- Checkboxes will be dynamically added here -->
           </div>
+          <div class="mb-4">
+            <label class="block text-gray-300 font-semibold mb-2">Image de la mission (glisser-déposer)</label>
+            <div id="dropZone" class="drop-zone mb-2">
+              <p>Glissez une image ici ou cliquez pour sélectionner</p>
+              <input type="file" id="imageInput" accept="image/*" class="hidden">
+            </div>
+            <p id="imagePreview" class="text-gray-400 text-sm hidden">Image sélectionnée : <span id="imageName"></span></p>
+          </div>
           <textarea id="missionReport" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-4 text-white" rows="5" placeholder="Rapport de la mission"></textarea>
           <button id="submitMission" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Ajouter la Mission</button>
         </div>
@@ -99,11 +122,13 @@
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
     import { getFirestore, collection, getDocs, addDoc, doc, getDoc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+    import { getStorage, ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
     import { firebaseConfig } from './firebase-config.js';
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
+    const storage = getStorage(app);
 
     onAuthStateChanged(auth, user => {
       if (!user) {
@@ -135,14 +160,46 @@
       const isAdmin = localStorage.getItem('isAdmin') === 'true';
       const missionName = document.getElementById('missionName');
       const participantCheckboxes = document.getElementById('participantCheckboxes');
+      const dropZone = document.getElementById('dropZone');
+      const imageInput = document.getElementById('imageInput');
+      const imagePreview = document.getElementById('imagePreview');
+      const imageName = document.getElementById('imageName');
       const missionReport = document.getElementById('missionReport');
       const missionList = document.getElementById('missionList');
       const submitMission = document.getElementById('submitMission');
 
-      if (!missionName || !participantCheckboxes || !missionReport || !missionList || !submitMission) {
+      if (!missionName || !participantCheckboxes || !dropZone || !imageInput || !imagePreview || !imageName || !missionReport || !missionList || !submitMission) {
         console.error('Erreur : un ou plusieurs éléments DOM manquants');
         return;
       }
+
+      let selectedImage = null;
+
+      // Drag and drop functionality
+      dropZone.addEventListener('click', () => imageInput.click());
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      });
+      dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0 && files[0].type.startsWith('image/')) {
+          selectedImage = files[0];
+          imageName.textContent = selectedImage.name;
+          imagePreview.classList.remove('hidden');
+        }
+      });
+
+      imageInput.addEventListener('change', () => {
+        if (imageInput.files.length > 0) {
+          selectedImage = imageInput.files[0];
+          imageName.textContent = selectedImage.name;
+          imagePreview.classList.remove('hidden');
+        }
+      });
 
       async function loadMembers() {
         console.log('Chargement des membres depuis Firestore...');
@@ -183,10 +240,11 @@
           const missionDiv = document.createElement('div');
           missionDiv.className = 'bg-gray-800 p-4 rounded-lg flex justify-between items-start';
           missionDiv.innerHTML = `
-            <div>
+            <div class="flex-1">
               <h4 class="text-xl font-semibold text-red-600">${mission.name}</h4>
               <p class="text-gray-400 mb-2">Participants: ${mission.participants.map(id => members.find(m => m.id === id)?.name || 'Inconnu').join(', ')}</p>
               <p class="text-gray-300">${mission.report}</p>
+              ${mission.imageUrl ? `<img src="${mission.imageUrl}" alt="Image de la mission" class="mission-image mt-2 rounded">` : ''}
             </div>
             <button class="deleteMission bg-red-600 text-white px-3 py-1 rounded-full text-sm hover:bg-red-500" data-id="${doc.id}" ${isAdmin ? '' : 'style="display:none;"'}>Supprimer</button>
           `;
@@ -232,13 +290,25 @@
       submitMission.addEventListener('click', async () => {
         console.log('Ajout d\'une nouvelle mission...');
         const selectedParticipants = Array.from(participantCheckboxes.querySelectorAll('input:checked')).map(checkbox => checkbox.value);
+        const missionData = {
+          name: missionName.value.trim(),
+          participants: selectedParticipants,
+          report: missionReport.value.trim()
+        };
+
         if (missionName.value.trim() && selectedParticipants.length > 0 && missionReport.value.trim()) {
           try {
-            const missionRef = await addDoc(collection(db, 'missions'), {
-              name: missionName.value.trim(),
-              participants: selectedParticipants,
-              report: missionReport.value.trim()
-            });
+            let imageUrl = null;
+            if (selectedImage) {
+              console.log('Upload de l\'image :', selectedImage.name);
+              const storageRef = ref(storage, `missions/${missionRef.id}/${selectedImage.name}`);
+              const snapshot = await uploadBytes(storageRef, selectedImage);
+              imageUrl = await getDownloadURL(snapshot.ref);
+              console.log('Image uploadée :', imageUrl);
+              missionData.imageUrl = imageUrl;
+            }
+
+            const missionRef = await addDoc(collection(db, 'missions'), missionData);
             console.log('Mission ajoutée :', missionRef.id);
             for (const participantId of selectedParticipants) {
               const memberRef = doc(db, 'members', participantId);
@@ -255,6 +325,8 @@
             }
             missionName.value = '';
             missionReport.value = '';
+            selectedImage = null;
+            imagePreview.classList.add('hidden');
             participantCheckboxes.querySelectorAll('input:checked').forEach(checkbox => checkbox.checked = false);
             displayMissions();
           } catch (error) {
