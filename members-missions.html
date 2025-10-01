@@ -72,16 +72,16 @@
   <section class="bg-members py-20">
     <div class="container mx-auto">
       <h2 class="text-4xl font-bold text-center mb-12 text-white">Missions NOX VENATIR</h2>
-      <div class="max-w-4xl mx-auto">
+      <div class="max-w-6xl mx-auto">
         <!-- New Mission Frame with Image on Left -->
         <div class="bg-gray-800 rounded-lg mb-8">
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6"> <!-- Réduit gap de 8 à 6, padding de 8 à 6 -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
             <!-- Left: Image Preview -->
             <div class="flex flex-col items-center">
               <h3 class="text-xl font-semibold mb-4 text-red-600 text-center">Image de la mission</h3>
               <div class="mb-4">
                 <label class="block text-gray-300 font-semibold mb-2">URL de l'image (optionnel)</label>
-                <input type="url" id="missionImageUrl" class="w-full p-2 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="https://example.com/mission-image.jpg"> <!-- Réduit p-3 à p-2 -->
+                <input type="url" id="missionImageUrl" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="https://example.com/mission-image.jpg">
               </div>
               <div id="imagePreview" class="hidden">
                 <img id="previewImage" src="" alt="Aperçu de l'image" class="image-preview mb-2">
@@ -90,12 +90,12 @@
             </div>
             <!-- Right: Mission Form -->
             <div>
-              <input type="text" id="missionName" class="w-full p-2 bg-gray-700 border border-red-600/50 rounded-lg mb-3 text-white" placeholder="Nom de la mission"> <!-- Réduit p-3 à p-2, mb-4 à mb-3 -->
-              <div id="participantCheckboxes" class="space-y-2 mb-3"> <!-- Réduit mb-4 à mb-3 -->
+              <input type="text" id="missionName" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-6 text-white" placeholder="Nom de la mission"> <!-- mb-4 to mb-6 -->
+              <div id="participantCheckboxes" class="space-y-3 mb-6"> <!-- space-y-2 to space-y-3, mb-4 to mb-6 -->
                 <!-- Checkboxes will be dynamically added here -->
               </div>
-              <textarea id="missionReport" class="w-full p-2 bg-gray-700 border border-red-600/50 rounded-lg mb-3 text-white" rows="4" placeholder="Rapport de la mission"></textarea> <!-- Réduit p-3 à p-2, rows 5 à 4, mb-4 à mb-3 -->
-              <button id="submitMission" class="bg-red-600 text-white px-5 py-2 rounded-full font-semibold hover:bg-red-500 w-full">Ajouter la Mission</button> <!-- Réduit px-6 py-3 à px-5 py-2 -->
+              <textarea id="missionReport" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-6 text-white" rows="5" placeholder="Rapport de la mission"></textarea> <!-- mb-4 to mb-6 -->
+              <button id="submitMission" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Ajouter la Mission</button>
             </div>
           </div>
         </div>
@@ -213,13 +213,13 @@
         missionsSnapshot.forEach(doc => {
           const mission = { id: doc.id, ...doc.data() };
           const missionDiv = document.createElement('div');
-          missionDiv.className = 'bg-gray-800 p-4 rounded-lg flex justify-between items-start';
+          missionDiv.className = 'bg-gray-800 p-4 rounded-lg flex items-start space-x-4'; // flex with space-x-4 for side-by-side
           missionDiv.innerHTML = `
+            ${mission.imageUrl ? `<img src="${mission.imageUrl}" alt="Image de la mission" class="mission-image">` : ''}
             <div class="flex-1">
               <h4 class="text-xl font-semibold text-red-600">${mission.name}</h4>
               <p class="text-gray-400 mb-2">Participants: ${mission.participants.map(id => members.find(m => m.id === id)?.name || 'Inconnu').join(', ')}</p>
               <p class="text-gray-300">${mission.report}</p>
-              ${mission.imageUrl ? `<img src="${mission.imageUrl}" alt="Image de la mission" class="mission-image mt-2 rounded">` : ''}
             </div>
             <button class="deleteMission bg-red-600 text-white px-3 py-1 rounded-full text-sm hover:bg-red-500" data-id="${doc.id}" ${isAdmin ? '' : 'style="display:none;"'}>Supprimer</button>
           `;
