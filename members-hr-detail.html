@@ -293,7 +293,7 @@
             memberName.textContent = member.name || 'Inconnu';
 
             // Vérifier et charger la vidéo
-            if (member.video && member.video !== '' && member.video !== 'images/fiche RH/""' && member.video.endsWith('.mp4')) {
+            if (member.video && member.video !== '' && member.video !== 'images/fiche_RH/""' && member.video.endsWith('.mp4')) {
               console.log('Chargement de la vidéo :', member.video);
               memberVideo.querySelector('source').src = member.video;
               memberVideo.load();
