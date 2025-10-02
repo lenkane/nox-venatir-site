@@ -278,26 +278,30 @@
         console.log('Affichage des missions depuis Firestore...');
         missionList.innerHTML = '';
         const members = await loadMembers();
+        let missionsQuery;
         const sortValue = sortOrder.value.split('-');
         const sortField = sortValue[0];
         const sortDirection = sortValue[1];
-        const missionsQuery = query(collection(db, 'missions'), orderBy(sortField, sortDirection));
-        const missionsSnapshot = await getDocs(missionsQuery);
-        if (missionsSnapshot.empty) {
-          console.log('Aucune mission trouvée dans Firestore');
-          missionList.innerHTML = '<p class="text-gray-400">Aucune mission disponible.</p>';
+        try {
+          missionsQuery = query(collection(db, 'missions'), orderBy(sortField, sortDirection));
+        } catch (error) {
+          console.warn(`Erreur lors de la création de la requête avec ${sortField}, basculement vers requête sans tri:`, error);
+          missionsQuery = collection(db, 'missions'); // Fallback to unsorted query
         }
+        const missionsSnapshot = await getDocs(missionsQuery);
+        console.log('Nombre de missions récupérées :', missionsSnapshot.size);
         missionsSnapshot.forEach(doc => {
           const mission = { id: doc.id, ...doc.data() };
+          console.log('Mission chargée :', mission);
           const missionDiv = document.createElement('div');
           missionDiv.className = 'bg-gray-800 p-4 rounded-lg flex items-start space-x-4';
           missionDiv.style.cursor = 'pointer';
           missionDiv.innerHTML = `
             ${mission.imageUrl ? `<img src="${mission.imageUrl}" alt="Image de la mission" class="mission-image">` : ''}
             <div class="flex-1">
-              <h4 class="text-xl font-semibold text-red-600">${mission.name}</h4>
+              <h4 class="text-xl font-semibold text-red-600">${mission.name || 'Mission sans nom'}</h4>
               <p class="text-gray-400 mb-2">Participants: ${mission.participants.map(id => members.find(m => m.id === id)?.name || 'Inconnu').join(', ')}</p>
-              <p class="text-gray-300">${mission.report}</p>
+              <p class="text-gray-300">${mission.report || 'Aucun rapport'}</p>
             </div>
             <button class="deleteMission bg-red-600 text-white px-3 py-1 rounded-full text-sm hover:bg-red-500" data-id="${doc.id}" ${isAdmin ? '' : 'style="display:none;"'}>Supprimer</button>
           `;
@@ -308,6 +312,10 @@
           });
           missionList.appendChild(missionDiv);
         });
+        if (missionsSnapshot.empty) {
+          console.log('Aucune mission trouvée dans Firestore');
+          missionList.innerHTML = '<p class="text-gray-400">Aucune mission disponible.</p>';
+        }
         document.querySelectorAll('.deleteMission').forEach(button => {
           button.addEventListener('click', async function(event) {
             event.stopPropagation();
@@ -345,7 +353,7 @@
         });
       }
       function showMissionDetails(mission, members) {
-        document.getElementById('modalMissionName').textContent = mission.name;
+        document.getElementById('modalMissionName').textContent = mission.name || 'Mission sans nom';
         const modalImage = document.getElementById('modalMissionImage');
         if (mission.imageUrl) {
           modalImage.src = mission.imageUrl;
@@ -354,7 +362,7 @@
           modalImage.classList.add('hidden');
         }
         document.getElementById('modalParticipants').textContent = 'Participants: ' + mission.participants.map(id => members.find(m => m.id === id)?.name || 'Inconnu').join(', ');
-        document.getElementById('modalReport').textContent = mission.report;
+        document.getElementById('modalReport').textContent = mission.report || 'Aucun rapport';
         document.getElementById('modalDetailedReport').value = mission.detailedReport || '';
         document.getElementById('missionModal').classList.add('show');
         document.getElementById('saveDetailedReport').onclick = async () => {
