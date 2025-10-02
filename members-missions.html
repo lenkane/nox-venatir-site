@@ -50,6 +50,31 @@
     .bg-members { background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('images/banner.gif'); background-size: cover; background-position: center; }
     .mission-image { max-width: 400px; max-height: 400px; border-radius: 0.25rem; }
     .image-preview { width: 100%; height: 200px; object-fit: cover; border-radius: 0.25rem; }
+    #missionModal { 
+      display: none; /* Hidden by default */
+      align-items: center; 
+      justify-content: center; 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      z-index: 50; 
+      overflow-y: auto; /* Allow scrolling if content overflows */
+    }
+    #missionModal.show { 
+      display: flex; /* Show when 'show' class is added */
+    }
+    .modal-content { 
+      background-color: #1f2937; /* bg-gray-800 */
+      padding: 1.5rem; 
+      border-radius: 0.5rem; 
+      max-width: 32rem; /* max-w-lg */
+      width: 90%; 
+      max-height: 90vh; /* Prevent overflow beyond viewport */
+      overflow-y: auto; /* Scroll inside modal if needed */
+      border: 1px solid rgba(239, 68, 68, 0.5); /* border-red-600/50 */
+    }
   </style>
 </head>
 <body class="bg-black text-white">
@@ -106,8 +131,8 @@
     </div>
   </section>
   <!-- Mission Details Modal -->
-  <div id="missionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
-    <div class="bg-gray-800 p-6 rounded-lg max-w-lg w-full">
+  <div id="missionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden">
+    <div class="modal-content">
       <h3 id="modalMissionName" class="text-xl font-semibold text-red-600 mb-4"></h3>
       <img id="modalMissionImage" src="" alt="Image de la mission" class="mission-image mb-4 hidden">
       <p id="modalParticipants" class="text-gray-400 mb-4"></p>
@@ -268,7 +293,7 @@
         });
         document.querySelectorAll('.deleteMission').forEach(button => {
           button.addEventListener('click', async function(event) {
-            event.stopPropagation(); // Prevent triggering the missionDiv click
+            event.stopPropagation();
             const id = this.dataset.id;
             if (confirm('Supprimer cette mission ?')) {
               try {
@@ -314,14 +339,13 @@
         document.getElementById('modalParticipants').textContent = 'Participants: ' + mission.participants.map(id => members.find(m => m.id === id)?.name || 'Inconnu').join(', ');
         document.getElementById('modalReport').textContent = mission.report;
         document.getElementById('modalDetailedReport').value = mission.detailedReport || '';
-        document.getElementById('missionModal').classList.remove('hidden');
+        document.getElementById('missionModal').classList.add('show');
         document.getElementById('saveDetailedReport').onclick = async () => {
           const detailedReport = document.getElementById('modalDetailedReport').value.trim();
           try {
             await updateDoc(doc(db, 'missions', mission.id), { detailedReport });
             console.log('Rapport détaillé mis à jour');
             closeModal();
-            displayMissions(); // Refresh list if needed, but since detailedReport not shown in list, optional
           } catch (error) {
             console.error('Erreur lors de la mise à jour :', error);
             alert('Erreur lors de la sauvegarde.');
@@ -330,7 +354,7 @@
         document.getElementById('closeModal').onclick = closeModal;
       }
       function closeModal() {
-        document.getElementById('missionModal').classList.add('hidden');
+        document.getElementById('missionModal').classList.remove('show');
       }
       submitMission.addEventListener('click', async () => {
         console.log('Ajout d\'une nouvelle mission...');
@@ -340,7 +364,7 @@
           participants: selectedParticipants,
           report: missionReport.value.trim(),
           imageUrl: missionImageUrl.value.trim() || null,
-          detailedReport: '' // Initialize detailed report as empty
+          detailedReport: ''
         };
         if (missionName.value.trim() && selectedParticipants.length > 0 && missionReport.value.trim()) {
           try {
