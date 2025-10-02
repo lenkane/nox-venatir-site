@@ -105,6 +105,20 @@
       </div>
     </div>
   </section>
+  <!-- Mission Details Modal -->
+  <div id="missionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-gray-800 p-6 rounded-lg max-w-lg w-full">
+      <h3 id="modalMissionName" class="text-xl font-semibold text-red-600 mb-4"></h3>
+      <img id="modalMissionImage" src="" alt="Image de la mission" class="mission-image mb-4 hidden">
+      <p id="modalParticipants" class="text-gray-400 mb-4"></p>
+      <p id="modalReport" class="text-gray-300 mb-4"></p>
+      <textarea id="modalDetailedReport" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-4 text-white" rows="5" placeholder="Rapport détaillé"></textarea>
+      <div class="flex justify-end space-x-4">
+        <button id="closeModal" class="bg-gray-600 text-white px-4 py-2 rounded-full">Fermer</button>
+        <button id="saveDetailedReport" class="bg-red-600 text-white px-4 py-2 rounded-full">Sauvegarder</button>
+      </div>
+    </div>
+  </div>
   <!-- Footer -->
   <footer class="bg-gray-900 text-gray-400 py-6 border-t border-red-600/50">
     <div class="container mx-auto text-center">
@@ -235,6 +249,7 @@
           const mission = { id: doc.id, ...doc.data() };
           const missionDiv = document.createElement('div');
           missionDiv.className = 'bg-gray-800 p-4 rounded-lg flex items-start space-x-4';
+          missionDiv.style.cursor = 'pointer';
           missionDiv.innerHTML = `
             ${mission.imageUrl ? `<img src="${mission.imageUrl}" alt="Image de la mission" class="mission-image">` : ''}
             <div class="flex-1">
@@ -244,10 +259,16 @@
             </div>
             <button class="deleteMission bg-red-600 text-white px-3 py-1 rounded-full text-sm hover:bg-red-500" data-id="${doc.id}" ${isAdmin ? '' : 'style="display:none;"'}>Supprimer</button>
           `;
+          missionDiv.addEventListener('click', (event) => {
+            if (!event.target.classList.contains('deleteMission')) {
+              showMissionDetails(mission, members);
+            }
+          });
           missionList.appendChild(missionDiv);
         });
         document.querySelectorAll('.deleteMission').forEach(button => {
-          button.addEventListener('click', async function() {
+          button.addEventListener('click', async function(event) {
+            event.stopPropagation(); // Prevent triggering the missionDiv click
             const id = this.dataset.id;
             if (confirm('Supprimer cette mission ?')) {
               try {
@@ -281,6 +302,36 @@
           });
         });
       }
+      function showMissionDetails(mission, members) {
+        document.getElementById('modalMissionName').textContent = mission.name;
+        const modalImage = document.getElementById('modalMissionImage');
+        if (mission.imageUrl) {
+          modalImage.src = mission.imageUrl;
+          modalImage.classList.remove('hidden');
+        } else {
+          modalImage.classList.add('hidden');
+        }
+        document.getElementById('modalParticipants').textContent = 'Participants: ' + mission.participants.map(id => members.find(m => m.id === id)?.name || 'Inconnu').join(', ');
+        document.getElementById('modalReport').textContent = mission.report;
+        document.getElementById('modalDetailedReport').value = mission.detailedReport || '';
+        document.getElementById('missionModal').classList.remove('hidden');
+        document.getElementById('saveDetailedReport').onclick = async () => {
+          const detailedReport = document.getElementById('modalDetailedReport').value.trim();
+          try {
+            await updateDoc(doc(db, 'missions', mission.id), { detailedReport });
+            console.log('Rapport détaillé mis à jour');
+            closeModal();
+            displayMissions(); // Refresh list if needed, but since detailedReport not shown in list, optional
+          } catch (error) {
+            console.error('Erreur lors de la mise à jour :', error);
+            alert('Erreur lors de la sauvegarde.');
+          }
+        };
+        document.getElementById('closeModal').onclick = closeModal;
+      }
+      function closeModal() {
+        document.getElementById('missionModal').classList.add('hidden');
+      }
       submitMission.addEventListener('click', async () => {
         console.log('Ajout d\'une nouvelle mission...');
         const selectedParticipants = Array.from(participantCheckboxes.querySelectorAll('input:checked')).map(checkbox => checkbox.value);
@@ -288,7 +339,8 @@
           name: missionName.value.trim(),
           participants: selectedParticipants,
           report: missionReport.value.trim(),
-          imageUrl: missionImageUrl.value.trim() || null
+          imageUrl: missionImageUrl.value.trim() || null,
+          detailedReport: '' // Initialize detailed report as empty
         };
         if (missionName.value.trim() && selectedParticipants.length > 0 && missionReport.value.trim()) {
           try {
