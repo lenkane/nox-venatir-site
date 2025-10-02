@@ -266,7 +266,7 @@
         console.log('Affichage des missions depuis Firestore...');
         missionList.innerHTML = '';
         const members = await loadMembers();
-        const missionsQuery = query(collection(db, 'missions'), orderBy('name', 'desc'));
+        const missionsQuery = collection(db, 'missions'); // Requête simple sans orderBy
         const missionsSnapshot = await getDocs(missionsQuery);
         if (missionsSnapshot.empty) {
           console.log('Aucune mission trouvée dans Firestore');
