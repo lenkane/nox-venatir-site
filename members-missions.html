@@ -120,7 +120,7 @@
               <div id="participantCheckboxes" class="space-y-3 mb-6">
                 <!-- Checkboxes will be dynamically added here -->
               </div>
-              <textarea id="missionReport" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-6 text-white" rows="5" placeholder="Briefing mission"></textarea>
+              <textarea id="missionReport" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-6 text-white" rows="5" placeholder="Rapport de la mission"></textarea>
               <button id="submitMission" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Ajouter la Mission</button>
             </div>
           </div>
@@ -187,8 +187,8 @@
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
-    import { getFirestore, collection, getDocs, addDoc, doc, getDoc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-    import { firebaseConfig } from './firebase-config.js';
+    import { getFirestore, collection, getDocs, addDoc, doc, getDoc, updateDoc, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+    import { serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
@@ -266,7 +266,8 @@
         console.log('Affichage des missions depuis Firestore...');
         missionList.innerHTML = '';
         const members = await loadMembers();
-        const missionsSnapshot = await getDocs(collection(db, 'missions'));
+        const missionsQuery = query(collection(db, 'missions'), orderBy('createdAt', 'desc'));
+        const missionsSnapshot = await getDocs(missionsQuery);
         if (missionsSnapshot.empty) {
           console.log('Aucune mission trouvée dans Firestore');
           missionList.innerHTML = '<p class="text-gray-400">Aucune mission disponible.</p>';
@@ -365,12 +366,27 @@
           participants: selectedParticipants,
           report: missionReport.value.trim(),
           imageUrl: missionImageUrl.value.trim() || null,
-          detailedReport: ''
+          detailedReport: '',
+          createdAt: serverTimestamp()
         };
         if (missionName.value.trim() && selectedParticipants.length > 0 && missionReport.value.trim()) {
           try {
             await addDoc(collection(db, 'missions'), missionData);
             console.log('Mission ajoutée avec succès');
+            // Increment missionCount for each participant
+            for (const participantId of selectedParticipants) {
+              const memberRef = doc(db, 'members', participantId);
+              const memberDoc = await getDoc(memberRef);
+              if (memberDoc.exists()) {
+                const member = memberDoc.data();
+                console.log(`Incrémentation de missionCount pour ${participantId}: ${member.missionCount || 0}`);
+                await updateDoc(memberRef, {
+                  missionCount: (member.missionCount || 0) + 1
+                });
+              } else {
+                console.warn(`Membre ${participantId} non trouvé`);
+              }
+            }
             missionName.value = '';
             missionReport.value = '';
             missionImageUrl.value = '';
