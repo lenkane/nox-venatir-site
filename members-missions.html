@@ -208,12 +208,14 @@
       document.getElementById('missionList').innerHTML = '<p class="error-message">Erreur : Impossible de se connecter à la base de données. Vérifiez la configuration Firebase.</p>';
     }
     onAuthStateChanged(auth, user => {
+      console.log('État de l\'authentification vérifié, utilisateur :', user ? user.uid : 'Aucun utilisateur');
       if (!user) {
         console.log('Utilisateur non connecté, redirection vers login.html');
         window.location.href = 'login.html';
         return;
       }
       user.getIdTokenResult().then(idTokenResult => {
+        console.log('Token récupéré, isAdmin :', idTokenResult.claims.isAdmin || false);
         const isAdmin = idTokenResult.claims.isAdmin || false;
         localStorage.setItem('isAdmin', isAdmin.toString());
         initializePage();
@@ -223,7 +225,9 @@
       });
     });
     document.getElementById('logout').addEventListener('click', () => {
+      console.log('Déconnexion initiée');
       signOut(auth).then(() => {
+        console.log('Déconnexion réussie');
         localStorage.removeItem('isAdmin');
         window.location.href = 'index.html';
       }).catch(error => {
@@ -247,6 +251,7 @@
       }
       missionImageUrl.addEventListener('input', () => {
         const url = missionImageUrl.value.trim();
+        console.log('URL de l\'image saisie :', url);
         if (url) {
           previewImage.src = url;
           previewImage.classList.remove('hidden');
@@ -308,6 +313,7 @@
               <button class="deleteMission bg-red-600 text-white px-3 py-1 rounded-full text-sm hover:bg-red-500" data-id="${doc.id}" ${isAdmin ? '' : 'style="display:none;"'}>Supprimer</button>
             `;
             missionDiv.addEventListener('click', (event) => {
+              console.log('Clic sur la mission, ID :', mission.id);
               if (!event.target.classList.contains('deleteMission')) {
                 showMissionDetails(mission, members);
               }
@@ -324,6 +330,7 @@
         }
       }
       function showMissionDetails(mission, members) {
+        console.log('Affichage des détails de la mission :', mission);
         document.getElementById('modalMissionName').textContent = mission.name || 'Mission sans nom';
         const modalImage = document.getElementById('modalMissionImage');
         if (mission.imageUrl) {
@@ -338,6 +345,7 @@
         document.getElementById('missionModal').classList.add('show');
         document.getElementById('saveDetailedReport').onclick = async () => {
           const detailedReport = document.getElementById('modalDetailedReport').value.trim();
+          console.log('Sauvegarde du rapport détaillé pour la mission :', mission.id);
           try {
             await updateDoc(doc(db, 'missions', mission.id), { detailedReport });
             console.log('Rapport détaillé mis à jour');
@@ -350,6 +358,7 @@
         document.getElementById('closeModal').onclick = closeModal;
       }
       function closeModal() {
+        console.log('Fermeture du modal');
         document.getElementById('missionModal').classList.remove('show');
       }
       submitMission.addEventListener('click', async () => {
