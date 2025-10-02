@@ -57,23 +57,24 @@
       position: fixed; 
       top: 0; 
       left: 0; 
-      width: 100%; 
-      height: 100%; 
-      z-index: 50; 
-      overflow-y: auto; /* Allow scrolling if content overflows */
+      width: 100vw; 
+      height: 100vh; 
+      z-index: 1000; /* High z-index to ensure modal is on top */
+      background-color: rgba(0, 0, 0, 0.75); /* Darker background */
     }
     #missionModal.show { 
       display: flex; /* Show when 'show' class is added */
     }
     .modal-content { 
       background-color: #1f2937; /* bg-gray-800 */
-      padding: 1.5rem; 
+      padding: 2rem; /* Increased padding */
       border-radius: 0.5rem; 
-      max-width: 32rem; /* max-w-lg */
+      max-width: 36rem; /* Slightly larger modal */
       width: 90%; 
-      max-height: 90vh; /* Prevent overflow beyond viewport */
-      overflow-y: auto; /* Scroll inside modal if needed */
+      max-height: 90vh; /* Prevent overflow */
+      overflow-y: auto; /* Scroll if content overflows */
       border: 1px solid rgba(239, 68, 68, 0.5); /* border-red-600/50 */
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* Add depth */
     }
   </style>
 </head>
@@ -119,7 +120,7 @@
               <div id="participantCheckboxes" class="space-y-3 mb-6">
                 <!-- Checkboxes will be dynamically added here -->
               </div>
-              <textarea id="missionReport" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-6 text-white" rows="5" placeholder="Rapport de la mission"></textarea>
+              <textarea id="missionReport" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-6 text-white" rows="5" placeholder="Briefing mission"></textarea>
               <button id="submitMission" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Ajouter la Mission</button>
             </div>
           </div>
@@ -131,7 +132,7 @@
     </div>
   </section>
   <!-- Mission Details Modal -->
-  <div id="missionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden">
+  <div id="missionModal" class="fixed inset-0 bg-black bg-opacity-75">
     <div class="modal-content">
       <h3 id="modalMissionName" class="text-xl font-semibold text-red-600 mb-4"></h3>
       <img id="modalMissionImage" src="" alt="Image de la mission" class="mission-image mb-4 hidden">
@@ -348,7 +349,7 @@
             closeModal();
           } catch (error) {
             console.error('Erreur lors de la mise à jour :', error);
-            alert('Erreur lors de la sauvegarde.');
+            alert('Erreur lors de la sauvegarde. Vérifiez la console.');
           }
         };
         document.getElementById('closeModal').onclick = closeModal;
