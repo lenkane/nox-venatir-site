@@ -67,65 +67,91 @@
       </ul>
     </div>
   </nav>
-
-<!-- Missions Section -->
-<section class="bg-members py-10">
-  <div class="container mx-auto">
-    <h2 class="text-4xl font-bold text-center mb-12 text-white">Missions NOX VENATIR</h2>
-    <div class="max-w-4xl mx-auto">
-      <!-- New Mission Frame with Image on Left -->
-      <div class="bg-gray-800 rounded-lg mb-8">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
-          <!-- Left: Image Preview -->
-          <div class="flex flex-col items-center">
-            <div class="flex items-center w-full mb-4">
-              <h3 class="text-xl font-semibold text-red-600 pr-12">Image de la mission</h3> <!-- Increased from pr-8 to pr-12 -->
-              <div class="flex items-center flex-1">
-                <input type="url" id="missionImageUrl" class="p-2 bg-gray-700 border border-red-600/50 rounded-lg text-white flex-1" placeholder="https://example.com/mission-image.jpg">
-                <span class="text-gray-300 text-sm ml-4">(optionnel)</span>
+  <!-- Missions Section -->
+  <section class="bg-members py-10">
+    <div class="container mx-auto">
+      <h2 class="text-4xl font-bold text-center mb-12 text-white">Missions NOX VENATIR</h2>
+      <div class="max-w-4xl mx-auto">
+        <!-- New Mission Frame with Image on Left -->
+        <div class="bg-gray-800 rounded-lg mb-8">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+            <!-- Left: Image Preview -->
+            <div class="flex flex-col items-center">
+              <div class="flex items-center w-full mb-4">
+                <div class="flex items-center flex-1">
+                  <input type="url" id="missionImageUrl" class="p-2 bg-gray-700 border border-red-600/50 rounded-lg text-white flex-1" placeholder="Image de la mission / URL">
+                  <span class="text-gray-300 text-sm ml-4">(optionnel)</span>
+                </div>
+              </div>
+              <div id="imagePreview" class="hidden">
+                <img id="previewImage" src="" alt="Aperçu de l'image" class="image-preview mb-2">
+                <p class="text-gray-400 text-sm text-center">Aperçu de l'image sélectionnée</p>
               </div>
             </div>
-            <div id="imagePreview" class="hidden">
-              <img id="previewImage" src="" alt="Aperçu de l'image" class="image-preview mb-2">
-              <p class="text-gray-400 text-sm text-center">Aperçu de l'image sélectionnée</p>
+            <!-- Right: Mission Form -->
+            <div>
+              <input type="text" id="missionName" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-6 text-white" placeholder="Nom de la mission">
+              <div id="participantCheckboxes" class="space-y-3 mb-6">
+                <!-- Checkboxes will be dynamically added here -->
+              </div>
+              <textarea id="missionReport" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-6 text-white" rows="5" placeholder="Rapport de la mission"></textarea>
+              <button id="submitMission" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Ajouter la Mission</button>
             </div>
-          </div>
-          <!-- Right: Mission Form -->
-          <div>
-            <input type="text" id="missionName" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-6 text-white" placeholder="Nom de la mission">
-            <div id="participantCheckboxes" class="space-y-3 mb-6">
-              <!-- Checkboxes will be dynamically added here -->
-            </div>
-            <textarea id="missionReport" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg mb-6 text-white" rows="5" placeholder="Rapport de la mission"></textarea>
-            <button id="submitMission" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Ajouter la Mission</button>
           </div>
         </div>
-      </div>
-      <div id="missionList" class="space-y-4">
-        <!-- Mission list content -->
+        <div id="missionList" class="space-y-4">
+          <!-- Mission list content -->
+        </div>
       </div>
     </div>
-  </div>
-</section>
-
+  </section>
   <!-- Footer -->
   <footer class="bg-gray-900 text-gray-400 py-6 border-t border-red-600/50">
     <div class="container mx-auto text-center">
       <p>&copy; 2955 NOX VENATIR. Tous droits réservés. Hunt the stars, citizen.</p>
     </div>
   </footer>
-
   <!-- JavaScript -->
+  <script type="text/javascript">
+    var gk_isXlsx = false;
+    var gk_xlsxFileLookup = {};
+    var gk_fileData = {};
+    function filledCell(cell) {
+      return cell !== '' && cell != null;
+    }
+    function loadFileData(filename) {
+      if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+        try {
+          var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+          var firstSheetName = workbook.SheetNames[0];
+          var worksheet = workbook.Sheets[firstSheetName];
+          var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+          var filteredData = jsonData.filter(row => row.some(filledCell));
+          var headerRowIndex = filteredData.findIndex((row, index) =>
+            row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+          );
+          if (headerRowIndex === -1 || headerRowIndex > 25) {
+            headerRowIndex = 0;
+          }
+          var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+          csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+          return csv;
+        } catch (e) {
+          console.error(e);
+          return "";
+        }
+      }
+      return gk_fileData[filename] || "";
+    }
+  </script>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
     import { getFirestore, collection, getDocs, addDoc, doc, getDoc, updateDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
     import { firebaseConfig } from './firebase-config.js';
-
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-
     onAuthStateChanged(auth, user => {
       if (!user) {
         console.log('Utilisateur non connecté, redirection vers login.html');
@@ -140,7 +166,6 @@
         console.error('Erreur lors de la récupération du token :', error);
       });
     });
-
     document.getElementById('logout').addEventListener('click', () => {
       signOut(auth).then(() => {
         localStorage.removeItem('isLoggedIn');
@@ -150,7 +175,6 @@
         console.error('Erreur lors de la déconnexion :', error);
       });
     });
-
     async function initializePage() {
       console.log('Initialisation de la page...');
       const isAdmin = localStorage.getItem('isAdmin') === 'true';
@@ -161,13 +185,10 @@
       const missionReport = document.getElementById('missionReport');
       const missionList = document.getElementById('missionList');
       const submitMission = document.getElementById('submitMission');
-
       if (!missionName || !participantCheckboxes || !missionImageUrl || !previewImage || !missionReport || !missionList || !submitMission) {
         console.error('Erreur : un ou plusieurs éléments DOM manquants');
         return;
       }
-
-      // Preview image on URL change
       missionImageUrl.addEventListener('input', () => {
         const url = missionImageUrl.value.trim();
         if (url) {
@@ -177,7 +198,6 @@
           previewImage.classList.add('hidden');
         }
       });
-
       async function loadMembers() {
         console.log('Chargement des membres depuis Firestore...');
         participantCheckboxes.innerHTML = '';
@@ -202,7 +222,6 @@
         console.log('Membres chargés :', members);
         return members;
       }
-
       async function displayMissions() {
         console.log('Affichage des missions depuis Firestore...');
         missionList.innerHTML = '';
@@ -215,7 +234,7 @@
         missionsSnapshot.forEach(doc => {
           const mission = { id: doc.id, ...doc.data() };
           const missionDiv = document.createElement('div');
-          missionDiv.className = 'bg-gray-800 p-4 rounded-lg flex items-start space-x-4'; // flex with space-x-4 for side-by-side
+          missionDiv.className = 'bg-gray-800 p-4 rounded-lg flex items-start space-x-4';
           missionDiv.innerHTML = `
             ${mission.imageUrl ? `<img src="${mission.imageUrl}" alt="Image de la mission" class="mission-image">` : ''}
             <div class="flex-1">
@@ -227,7 +246,6 @@
           `;
           missionList.appendChild(missionDiv);
         });
-
         document.querySelectorAll('.deleteMission').forEach(button => {
           button.addEventListener('click', async function() {
             const id = this.dataset.id;
@@ -263,7 +281,6 @@
           });
         });
       }
-
       submitMission.addEventListener('click', async () => {
         console.log('Ajout d\'une nouvelle mission...');
         const selectedParticipants = Array.from(participantCheckboxes.querySelectorAll('input:checked')).map(checkbox => checkbox.value);
@@ -273,7 +290,6 @@
           report: missionReport.value.trim(),
           imageUrl: missionImageUrl.value.trim() || null
         };
-
         if (missionName.value.trim() && selectedParticipants.length > 0 && missionReport.value.trim()) {
           try {
             await addDoc(collection(db, 'missions'), missionData);
@@ -292,7 +308,6 @@
           alert('Veuillez remplir tous les champs.');
         }
       });
-
       displayMissions();
     }
   </script>
