@@ -99,15 +99,6 @@
     <div class="container mx-auto">
       <h2 class="text-4xl font-bold text-center mb-12 text-white">Missions NOX VENATIR</h2>
       <div class="max-w-4xl mx-auto">
-        <!-- Sort Options -->
-        <div class="mb-6 flex justify-end">
-          <select id="sortOrder" class="p-2 bg-gray-700 border border-red-600/50 rounded-lg text-white">
-            <option value="createdAt-desc">Plus récent en premier</option>
-            <option value="createdAt-asc">Plus ancien en premier</option>
-            <option value="name-asc" selected>Nom (A-Z)</option>
-            <option value="name-desc">Nom (Z-A)</option>
-          </select>
-        </div>
         <!-- New Mission Frame with Image on Left -->
         <div class="bg-gray-800 rounded-lg mb-8">
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
@@ -198,7 +189,6 @@
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
     import { getFirestore, collection, getDocs, addDoc, doc, getDoc, updateDoc, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-    import { serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
     // Replace with your Firebase config
     const firebaseConfig = {
       apiKey: "your-api-key",
@@ -216,7 +206,6 @@
     } catch (error) {
       console.error('Erreur lors de l\'initialisation de Firebase :', error);
       document.getElementById('missionList').innerHTML = '<p class="error-message">Erreur : Impossible de se connecter à la base de données. Vérifiez la configuration Firebase.</p>';
-      return;
     }
     onAuthStateChanged(auth, user => {
       if (!user) {
@@ -251,8 +240,7 @@
       const missionReport = document.getElementById('missionReport');
       const missionList = document.getElementById('missionList');
       const submitMission = document.getElementById('submitMission');
-      const sortOrder = document.getElementById('sortOrder');
-      if (!missionName || !participantCheckboxes || !missionImageUrl || !previewImage || !missionReport || !missionList || !submitMission || !sortOrder) {
+      if (!missionName || !participantCheckboxes || !missionImageUrl || !previewImage || !missionReport || !missionList || !submitMission) {
         console.error('Erreur : un ou plusieurs éléments DOM manquants');
         missionList.innerHTML = '<p class="error-message">Erreur : Problème d\'interface. Vérifiez la console.</p>';
         return;
@@ -265,9 +253,6 @@
         } else {
           previewImage.classList.add('hidden');
         }
-      });
-      sortOrder.addEventListener('change', () => {
-        displayMissions();
       });
       async function loadMembers() {
         console.log('Chargement des membres depuis Firestore...');
@@ -303,17 +288,8 @@
         console.log('Affichage des missions depuis Firestore...');
         missionList.innerHTML = '';
         const members = await loadMembers();
-        let missionsQuery;
-        const sortValue = sortOrder.value.split('-');
-        const sortField = sortValue[0];
-        const sortDirection = sortValue[1];
         try {
-          missionsQuery = query(collection(db, 'missions'), orderBy(sortField, sortDirection));
-        } catch (error) {
-          console.warn(`Erreur lors de la création de la requête avec ${sortField}, basculement vers requête sans tri:`, error);
-          missionsQuery = collection(db, 'missions');
-        }
-        try {
+          const missionsQuery = query(collection(db, 'missions'), orderBy('name', 'desc'));
           const missionsSnapshot = await getDocs(missionsQuery);
           console.log('Nombre de missions récupérées :', missionsSnapshot.size);
           missionsSnapshot.forEach(doc => {
@@ -384,8 +360,7 @@
           participants: selectedParticipants,
           report: missionReport.value.trim(),
           imageUrl: missionImageUrl.value.trim() || null,
-          detailedReport: '',
-          createdAt: serverTimestamp()
+          detailedReport: ''
         };
         if (missionName.value.trim() && selectedParticipants.length > 0 && missionReport.value.trim()) {
           try {
