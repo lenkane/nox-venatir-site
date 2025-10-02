@@ -50,27 +50,27 @@
     .bg-members { background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('images/banner.gif'); background-size: cover; background-position: center; }
     .mission-image { max-width: 400px; max-height: 400px; border-radius: 0.25rem; }
     .image-preview { width: 100%; height: 200px; object-fit: cover; border-radius: 0.25rem; }
-    #missionModal { 
+    #missionModal {
       display: none; /* Hidden by default */
-      align-items: center; 
-      justify-content: center; 
-      position: fixed; 
-      top: 0; 
-      left: 0; 
-      width: 100vw; 
-      height: 100vh; 
+      align-items: center;
+      justify-content: center;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
       z-index: 1000; /* High z-index to ensure modal is on top */
       background-color: rgba(0, 0, 0, 0.75); /* Darker background */
     }
-    #missionModal.show { 
+    #missionModal.show {
       display: flex; /* Show when 'show' class is added */
     }
-    .modal-content { 
+    .modal-content {
       background-color: #1f2937; /* bg-gray-800 */
       padding: 2rem; /* Increased padding */
-      border-radius: 0.5rem; 
+      border-radius: 0.5rem;
       max-width: 36rem; /* Slightly larger modal */
-      width: 90%; 
+      width: 90%;
       max-height: 90vh; /* Prevent overflow */
       overflow-y: auto; /* Scroll if content overflows */
       border: 1px solid rgba(239, 68, 68, 0.5); /* border-red-600/50 */
@@ -267,12 +267,17 @@
         missionList.innerHTML = '';
         const members = await loadMembers();
         const missionsSnapshot = await getDocs(collection(db, 'missions'));
-        if (missionsSnapshot.empty) {
+        const missions = [];
+        missionsSnapshot.forEach(doc => {
+          missions.push({ id: doc.id, ...doc.data() });
+        });
+        missions.sort((a, b) => b.name.localeCompare(a.name));
+        if (missions.length === 0) {
           console.log('Aucune mission trouvée dans Firestore');
           missionList.innerHTML = '<p class="text-gray-400">Aucune mission disponible.</p>';
+          return;
         }
-        missionsSnapshot.forEach(doc => {
-          const mission = { id: doc.id, ...doc.data() };
+        missions.forEach(mission => {
           const missionDiv = document.createElement('div');
           missionDiv.className = 'bg-gray-800 p-4 rounded-lg flex items-start space-x-4';
           missionDiv.style.cursor = 'pointer';
@@ -283,7 +288,7 @@
               <p class="text-gray-400 mb-2">Participants: ${mission.participants.map(id => members.find(m => m.id === id)?.name || 'Inconnu').join(', ')}</p>
               <p class="text-gray-300">${mission.report}</p>
             </div>
-            <button class="deleteMission bg-red-600 text-white px-3 py-1 rounded-full text-sm hover:bg-red-500" data-id="${doc.id}" ${isAdmin ? '' : 'style="display:none;"'}>Supprimer</button>
+            <button class="deleteMission bg-red-600 text-white px-3 py-1 rounded-full text-sm hover:bg-red-500" data-id="${mission.id}" ${isAdmin ? '' : 'style="display:none;"'}>Supprimer</button>
           `;
           missionDiv.addEventListener('click', (event) => {
             if (!event.target.classList.contains('deleteMission')) {
