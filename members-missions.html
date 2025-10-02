@@ -79,8 +79,10 @@
           <!-- Left: Image Preview -->
           <div class="flex flex-col items-center">
             <div class="flex items-center w-full mb-4">
-                <input type="url" id="missionImageUrl" class="p-2 bg-gray-700 pr-16 border border-red-600/50 rounded-lg text-white w-full max-w-md" placeholder="Image de la mission /URL">
-                <span class="text-gray-300 text-sm ml-16">    (optionnel)</span> <!-- Increased from ml-2 to ml-4 -->
+              <h3 class="text-xl font-semibold text-red-600 pr-12">Image de la mission</h3> <!-- Increased from pr-8 to pr-12 -->
+              <div class="flex items-center flex-1">
+                <input type="url" id="missionImageUrl" class="p-2 bg-gray-700 border border-red-600/50 rounded-lg text-white flex-1" placeholder="https://example.com/mission-image.jpg">
+                <span class="text-gray-300 text-sm ml-4">(optionnel)</span>
               </div>
             </div>
             <div id="imagePreview" class="hidden">
