@@ -266,7 +266,7 @@
         console.log('Affichage des missions depuis Firestore...');
         missionList.innerHTML = '';
         const members = await loadMembers();
-        const missionsQuery = query(collection(db, 'missions'), orderBy('createdAt', 'desc'));
+        const missionsQuery = query(collection(db, 'missions'), orderBy('name', 'desc'));
         const missionsSnapshot = await getDocs(missionsQuery);
         if (missionsSnapshot.empty) {
           console.log('Aucune mission trouvée dans Firestore');
@@ -366,8 +366,7 @@
           participants: selectedParticipants,
           report: missionReport.value.trim(),
           imageUrl: missionImageUrl.value.trim() || null,
-          detailedReport: '',
-          createdAt: serverTimestamp()
+          detailedReport: ''
         };
         if (missionName.value.trim() && selectedParticipants.length > 0 && missionReport.value.trim()) {
           try {
