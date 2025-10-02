@@ -76,6 +76,7 @@
       border: 1px solid rgba(239, 68, 68, 0.5);
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
     }
+    .error-message { color: #ef4444; text-align: center; }
   </style>
 </head>
 <body class="bg-black text-white">
@@ -198,9 +199,25 @@
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
     import { getFirestore, collection, getDocs, addDoc, doc, getDoc, updateDoc, deleteDoc, query, orderBy } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
     import { serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
+    // Replace with your Firebase config
+    const firebaseConfig = {
+      apiKey: "your-api-key",
+      authDomain: "your-auth-domain",
+      projectId: "your-project-id",
+      storageBucket: "your-storage-bucket",
+      messagingSenderId: "your-messaging-sender-id",
+      appId: "your-app-id"
+    };
+    let app, auth, db;
+    try {
+      app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      db = getFirestore(app);
+    } catch (error) {
+      console.error('Erreur lors de l\'initialisation de Firebase :', error);
+      document.getElementById('missionList').innerHTML = '<p class="error-message">Erreur : Impossible de se connecter à la base de données. Vérifiez la configuration Firebase.</p>';
+      return;
+    }
     onAuthStateChanged(auth, user => {
       if (!user) {
         console.log('Utilisateur non connecté, redirection vers login.html');
@@ -213,6 +230,7 @@
         initializePage();
       }).catch(error => {
         console.error('Erreur lors de la récupération du token :', error);
+        document.getElementById('missionList').innerHTML = '<p class="error-message">Erreur : Impossible de vérifier l\'authentification. Vérifiez la console.</p>';
       });
     });
     document.getElementById('logout').addEventListener('click', () => {
@@ -236,6 +254,7 @@
       const sortOrder = document.getElementById('sortOrder');
       if (!missionName || !participantCheckboxes || !missionImageUrl || !previewImage || !missionReport || !missionList || !submitMission || !sortOrder) {
         console.error('Erreur : un ou plusieurs éléments DOM manquants');
+        missionList.innerHTML = '<p class="error-message">Erreur : Problème d\'interface. Vérifiez la console.</p>';
         return;
       }
       missionImageUrl.addEventListener('input', () => {
@@ -253,26 +272,32 @@
       async function loadMembers() {
         console.log('Chargement des membres depuis Firestore...');
         participantCheckboxes.innerHTML = '';
-        const membersSnapshot = await getDocs(collection(db, 'members'));
-        const members = [];
-        if (membersSnapshot.empty) {
-          console.log('Aucun membre trouvé dans Firestore');
-          participantCheckboxes.innerHTML = '<p class="text-gray-400">Aucun membre disponible. Ajoutez des membres dans Fiche RH.</p>';
+        try {
+          const membersSnapshot = await getDocs(collection(db, 'members'));
+          const members = [];
+          if (membersSnapshot.empty) {
+            console.log('Aucun membre trouvé dans Firestore');
+            participantCheckboxes.innerHTML = '<p class="text-gray-400">Aucun membre disponible. Ajoutez des membres dans Fiche RH.</p>';
+            return members;
+          }
+          membersSnapshot.forEach(doc => {
+            const memberData = { id: doc.id, ...doc.data() };
+            members.push(memberData);
+            const label = document.createElement('label');
+            label.className = 'flex items-center space-x-2 text-gray-300';
+            label.innerHTML = `
+              <input type="checkbox" value="${doc.id}" class="form-checkbox h-5 w-5 text-red-600 bg-gray-700 border-red-600/50">
+              <span>${doc.data().name || 'Inconnu'}</span>
+            `;
+            participantCheckboxes.appendChild(label);
+          });
+          console.log('Membres chargés :', members);
           return members;
+        } catch (error) {
+          console.error('Erreur lors du chargement des membres :', error);
+          participantCheckboxes.innerHTML = '<p class="error-message">Erreur lors du chargement des membres. Vérifiez la console.</p>';
+          return [];
         }
-        membersSnapshot.forEach(doc => {
-          const memberData = { id: doc.id, ...doc.data() };
-          members.push(memberData);
-          const label = document.createElement('label');
-          label.className = 'flex items-center space-x-2 text-gray-300';
-          label.innerHTML = `
-            <input type="checkbox" value="${doc.id}" class="form-checkbox h-5 w-5 text-red-600 bg-gray-700 border-red-600/50">
-            <span>${doc.data().name}</span>
-          `;
-          participantCheckboxes.appendChild(label);
-        });
-        console.log('Membres chargés :', members);
-        return members;
       }
       async function displayMissions() {
         console.log('Affichage des missions depuis Firestore...');
@@ -286,71 +311,41 @@
           missionsQuery = query(collection(db, 'missions'), orderBy(sortField, sortDirection));
         } catch (error) {
           console.warn(`Erreur lors de la création de la requête avec ${sortField}, basculement vers requête sans tri:`, error);
-          missionsQuery = collection(db, 'missions'); // Fallback to unsorted query
+          missionsQuery = collection(db, 'missions');
         }
-        const missionsSnapshot = await getDocs(missionsQuery);
-        console.log('Nombre de missions récupérées :', missionsSnapshot.size);
-        missionsSnapshot.forEach(doc => {
-          const mission = { id: doc.id, ...doc.data() };
-          console.log('Mission chargée :', mission);
-          const missionDiv = document.createElement('div');
-          missionDiv.className = 'bg-gray-800 p-4 rounded-lg flex items-start space-x-4';
-          missionDiv.style.cursor = 'pointer';
-          missionDiv.innerHTML = `
-            ${mission.imageUrl ? `<img src="${mission.imageUrl}" alt="Image de la mission" class="mission-image">` : ''}
-            <div class="flex-1">
-              <h4 class="text-xl font-semibold text-red-600">${mission.name || 'Mission sans nom'}</h4>
-              <p class="text-gray-400 mb-2">Participants: ${mission.participants.map(id => members.find(m => m.id === id)?.name || 'Inconnu').join(', ')}</p>
-              <p class="text-gray-300">${mission.report || 'Aucun rapport'}</p>
-            </div>
-            <button class="deleteMission bg-red-600 text-white px-3 py-1 rounded-full text-sm hover:bg-red-500" data-id="${doc.id}" ${isAdmin ? '' : 'style="display:none;"'}>Supprimer</button>
-          `;
-          missionDiv.addEventListener('click', (event) => {
-            if (!event.target.classList.contains('deleteMission')) {
-              showMissionDetails(mission, members);
-            }
-          });
-          missionList.appendChild(missionDiv);
-        });
-        if (missionsSnapshot.empty) {
-          console.log('Aucune mission trouvée dans Firestore');
-          missionList.innerHTML = '<p class="text-gray-400">Aucune mission disponible.</p>';
-        }
-        document.querySelectorAll('.deleteMission').forEach(button => {
-          button.addEventListener('click', async function(event) {
-            event.stopPropagation();
-            const id = this.dataset.id;
-            if (confirm('Supprimer cette mission ?')) {
-              try {
-                const missionDoc = await getDoc(doc(db, 'missions', id));
-                if (!missionDoc.exists()) {
-                  console.error('Mission non trouvée :', id);
-                  return;
-                }
-                const mission = missionDoc.data();
-                for (const participantId of mission.participants) {
-                  const memberRef = doc(db, 'members', participantId);
-                  const memberDoc = await getDoc(memberRef);
-                  if (memberDoc.exists()) {
-                    const member = memberDoc.data();
-                    console.log(`Décrémentation de missionCount pour ${participantId}: ${member.missionCount}`);
-                    await updateDoc(memberRef, {
-                      missionCount: (member.missionCount || 0) - 1
-                    });
-                  } else {
-                    console.warn(`Membre ${participantId} non trouvé`);
-                  }
-                }
-                await deleteDoc(doc(db, 'missions', id));
-                console.log('Mission supprimée :', id);
-                displayMissions();
-              } catch (error) {
-                console.error('Erreur lors de la suppression de la mission :', error);
-                alert('Erreur lors de la suppression. Vérifiez la console.');
+        try {
+          const missionsSnapshot = await getDocs(missionsQuery);
+          console.log('Nombre de missions récupérées :', missionsSnapshot.size);
+          missionsSnapshot.forEach(doc => {
+            const mission = { id: doc.id, ...doc.data() };
+            console.log('Mission chargée :', mission);
+            const missionDiv = document.createElement('div');
+            missionDiv.className = 'bg-gray-800 p-4 rounded-lg flex items-start space-x-4';
+            missionDiv.style.cursor = 'pointer';
+            missionDiv.innerHTML = `
+              ${mission.imageUrl ? `<img src="${mission.imageUrl}" alt="Image de la mission" class="mission-image">` : ''}
+              <div class="flex-1">
+                <h4 class="text-xl font-semibold text-red-600">${mission.name || 'Mission sans nom'}</h4>
+                <p class="text-gray-400 mb-2">Participants: ${mission.participants.map(id => members.find(m => m.id === id)?.name || 'Inconnu').join(', ')}</p>
+                <p class="text-gray-300">${mission.report || 'Aucun rapport'}</p>
+              </div>
+              <button class="deleteMission bg-red-600 text-white px-3 py-1 rounded-full text-sm hover:bg-red-500" data-id="${doc.id}" ${isAdmin ? '' : 'style="display:none;"'}>Supprimer</button>
+            `;
+            missionDiv.addEventListener('click', (event) => {
+              if (!event.target.classList.contains('deleteMission')) {
+                showMissionDetails(mission, members);
               }
-            }
+            });
+            missionList.appendChild(missionDiv);
           });
-        });
+          if (missionsSnapshot.empty) {
+            console.log('Aucune mission trouvée dans Firestore');
+            missionList.innerHTML = '<p class="text-gray-400">Aucune mission disponible.</p>';
+          }
+        } catch (error) {
+          console.error('Erreur lors de la récupération des missions :', error);
+          missionList.innerHTML = '<p class="error-message">Erreur lors du chargement des missions. Vérifiez la console.</p>';
+        }
       }
       function showMissionDetails(mission, members) {
         document.getElementById('modalMissionName').textContent = mission.name || 'Mission sans nom';
