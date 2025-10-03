@@ -60,394 +60,348 @@
     .medal-item p { color: #e53e3e; font-size: 0.875rem; margin-top: 0.5rem; }
   </style>
 </head>
-<body>
-  <header>
-    <nav>
-      <ul>
-        <li><a href="index.html">Accueil</a></li>
-        <li><a href="journal.html">Journal de bord</a></li>
-        <li><a href="members-hr-detail.html">Fiche RH</a></li>
-        <li><a href="missions.html">Missions</a></li>
-        <li><a href="tactique.html">Tactique NOX</a></li>
-        <li><a href="#" id="logout">Déconnexion</a></li>
+<body class="bg-black text-white">
+  <!-- Navigation -->
+  <nav class="bg-gray-900/95 backdrop-blur-md text-white p-4 sticky top-0 z-20 border-b border-red-600/50">
+    <div class="container mx-auto flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-red-600">NOX VENATIR - Espace Membre</h1>
+      <ul class="flex space-x-6">
+        <li><a href="members-home.html" class="hover:text-red-500 transition">Accueil</a></li>
+        <li><a href="members-logbook.html" class="hover:text-red-500 transition">Journal de bord</a></li>
+        <li><a href="members-hr.html" class="hover:text-red-500 transition">Fiche RH</a></li>
+        <li><a href="members-missions.html" class="hover:text-red-500 transition">Missions</a></li>
+        <li><a href="members-tactics.html" class="hover:text-red-500 transition">Tactique NOX</a></li>
+        <li><button id="logout" class="bg-red-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-500">Déconnexion</button></li>
       </ul>
-    </nav>
-  </header>
+    </div>
+  </nav>
 
-  <main>
-    <section class="member-details">
-      <h2>Détails Membre</h2>
-      <div class="member-content">
-        <div class="video-container">
-          <video id="member-video" controls>
-            <source id="video-source" src="" type="video/mp4">
-          </video>
-          <div id="video-error" class="video-error" style="display: none;">
-            Erreur : Vidéo non disponible. Vérifiez le chemin dans Firestore.
+  <!-- Member Details Section -->
+  <section class="py-20">
+    <div class="container mx-auto">
+      <h2 class="text-4xl font-bold text-center mb-12 text-white" id="memberName">Détails Membre</h2>
+      <div class="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg">
+        <div class="flex flex-col md:flex-row">
+          <div class="md:w-2/3 mb-8 md:mb-0">
+            <video autoplay muted loop playsinline class="w-full rounded-lg" id="memberVideo">
+              <source src="" type="video/mp4">
+            </video>
+            <p id="videoError" class="text-red-500 text-sm mt-2 hidden">Erreur : Vidéo non disponible. Vérifiez le chemin dans Firestore.</p>
+          </div>
+          <div class="md:w-1/3 md:pl-8">
+            <div class="mb-4">
+              <label class="block text-gray-300 font-semibold mb-2">Race</label>
+              <input type="text" id="race" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="Race">
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-300 font-semibold mb-2">Âge</label>
+              <input type="text" id="age" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="Âge">
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-300 font-semibold mb-2">Origine</label>
+              <input type="text" id="origin" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="Origine">
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-300 font-semibold mb-2">Rôle</label>
+              <input type="text" id="role" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="Rôle">
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-300 font-semibold mb-2">Nombre de missions</label>
+              <div class="progress-bar w-full h-4">
+                <div id="missionCountBar" class="progress-bar-fill" style="width: 0%"></div>
+              </div>
+              <p class="text-gray-400 text-sm mt-1"><span id="missionCount">0</span> mission(s)</p>
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-300 font-semibold mb-2">Informations diverses</label>
+              <textarea id="miscInfo" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" rows="4" placeholder="Informations diverses"></textarea>
+            </div>
+            <button id="saveDetails" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Enregistrer</button>
           </div>
         </div>
-
-        <div class="member-info">
-          <label for="race">Race</label>
-          <input type="text" id="race" placeholder="Entrez la race">
-
-          <label for="age">Âge</label>
-          <input type="text" id="age" placeholder="Entrez l'âge">
-
-          <label for="origin">Origine</label>
-          <input type="text" id="origin" placeholder="Entrez l'origine">
-
-          <label for="role">Rôle</label>
-          <input type="text" id="role" placeholder="Entrez le rôle">
-
-          <label for="missions-count">Nombre de missions</label>
-          <span id="missions-count">0 mission(s)</span>
-
-          <label for="miscInfo">Informations diverses</label>
-          <textarea id="miscInfo" placeholder="Entrez des informations supplémentaires"></textarea>
-
-          <button id="save-button">Enregistrer</button>
+        <div class="mt-8" id="adminSection">
+          <h3 class="text-2xl font-semibold mb-4 text-red-600">Ajouter une Décoration</h3>
+          <button id="addDecoration" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Ajouter une Médaille</button>
         </div>
-
-        <div class="actions">
-          <button onclick="document.getElementById('medal-modal').style.display='block'">Ajouter une Médaille</button>
+        <!-- Medal Grid -->
+        <div class="mt-8">
+          <h3 class="text-2xl font-semibold mb-4 text-red-600">Médailles</h3>
+          <div id="medalGrid" class="medal-grid">
+            <!-- Medals will be dynamically added here -->
+          </div>
         </div>
-
-        <div class="medals-section">
-          <h3>Médailles</h3>
-          <div id="medals-list"></div>
-        </div>
-
-        <div class="missions-section">
-          <h3>Missions</h3>
-          <div id="missions-list"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Modal pour ajouter une médaille -->
-    <div id="medal-modal" class="modal" style="display: none;">
-      <div class="modal-content">
-        <span class="close" onclick="document.getElementById('medal-modal').style.display='none'">&times;</span>
-        <h3>Ajouter une Médaille</h3>
-        <label for="medal-name">Nom de la médaille</label>
-        <input type="text" id="medal-name" placeholder="Nom de la médaille">
-        <label for="medal-date">Date d'obtention</label>
-        <input type="date" id="medal-date">
-        <label for="medal-description">Description</label>
-        <textarea id="medal-description" placeholder="Description de la médaille"></textarea>
-        <label for="medal-image">Image de la médaille</label>
-        <input type="file" id="medal-image" accept="image/*">
-        <button onclick="addMedal()">Ajouter</button>
       </div>
     </div>
-  </main>
+    <!-- Add Medal Modal -->
+    <div id="addMedalModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3 class="text-xl font-semibold mb-4 text-red-600">Ajouter une Médaille</h3>
+        <div class="mb-4">
+          <label class="block text-gray-300 font-semibold mb-2">Nom de la médaille</label>
+          <input type="text" id="medalName" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="Nom de la médaille">
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-300 font-semibold mb-2">Date d'obtention</label>
+          <input type="date" id="medalDate" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white">
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-300 font-semibold mb-2">Description</label>
+          <textarea id="medalDescription" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" rows="4" placeholder="Description de la médaille"></textarea>
+        </div>
+        <div class="mb-4">
+          <label class="block text-gray-300 font-semibold mb-2">Image de la médaille</label>
+          <input type="text" id="medalImage" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" placeholder="Chemin de l'image (ex. images/medaille-pyro.png)">
+        </div>
+        <button id="submitMedal" class="bg-red-600 text-white px-6 py-3 rounded-full font-semibold hover:bg-red-500 w-full">Ajouter</button>
+      </div>
+    </div>
+    <!-- Medal Details Modal -->
+    <div id="medalDetailsModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3 class="text-xl font-semibold mb-4 text-red-600" id="detailMedalName"></h3>
+        <p class="text-gray-300 mb-2"><strong>Date :</strong> <span id="detailMedalDate"></span></p>
+        <p class="text-gray-300 mb-2"><strong>Description :</strong> <span id="detailMedalDescription"></span></p>
+        <img id="detailMedalImage" class="w-full h-32 object-contain rounded-lg mb-4" src="" alt="Médaille">
+      </div>
+    </div>
+  </section>
 
-  <footer>
-    <p>© 2955 NOX VENATIR. Tous droits réservés. Hunt the stars, citizen.</p>
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-gray-400 py-6 border-t border-red-600/50">
+    <div class="container mx-auto text-center">
+      <p>&copy; 2955 NOX VENATIR. Tous droits réservés. Hunt the stars, citizen.</p>
+    </div>
   </footer>
 
-  <script>
-    // Configuration Firebase (remplacez par vos propres valeurs)
-    const firebaseConfig = {
-      apiKey: "VOTRE_API_KEY",
-      authDomain: "VOTRE_PROJET.firebaseapp.com",
-      projectId: "VOTRE_PROJET",
-      storageBucket: "VOTRE_PROJET.appspot.com",
-      messagingSenderId: "VOTRE_SENDER_ID",
-      appId: "VOTRE_APP_ID"
-    };
+  <!-- JavaScript -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+    import { getFirestore, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+    import { firebaseConfig } from './firebase-config.js';
 
-    // Initialiser Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-    // Références aux éléments HTML
-    const raceInput = document.getElementById('race');
-    const ageInput = document.getElementById('age');
-    const originInput = document.getElementById('origin');
-    const roleInput = document.getElementById('role');
-    const miscInfoInput = document.getElementById('miscInfo');
-    const saveButton = document.getElementById('save-button');
-    const missionsCountSpan = document.getElementById('missions-count');
-    const missionsList = document.getElementById('missions-list');
-    const medalsList = document.getElementById('medals-list');
-    const videoElement = document.getElementById('member-video');
-    const videoSource = document.getElementById('video-source');
-    const videoError = document.getElementById('video-error');
-    const logoutLink = document.getElementById('logout');
-
-    // Charger les données utilisateur
-    function loadUserData() {
-      auth.onAuthStateChanged((user) => {
-        if (user) {
-          const userId = user.uid;
-          const userRef = db.collection('users').doc(userId);
-
-          // Charger les données utilisateur
-          userRef.get().then((doc) => {
-            if (doc.exists) {
-              const data = doc.data();
-              raceInput.value = data.race || '';
-              ageInput.value = data.age || '';
-              originInput.value = data.origin || '';
-              roleInput.value = data.role || '';
-              miscInfoInput.value = data.miscInfo || '';
-
-              // Charger la vidéo
-              if (data.videoUrl) {
-                videoSource.src = data.videoUrl;
-                videoElement.load();
-                videoError.style.display = 'none';
-              } else {
-                videoError.style.display = 'block';
-              }
-            } else {
-              console.log('Aucun document utilisateur trouvé.');
-            }
-          }).catch((error) => {
-            console.error('Erreur lors du chargement des données :', error);
-          });
-
-          // Charger les missions
-          loadMissions(userId);
-          // Charger les médailles
-          loadMedals(userId);
-        } else {
-          console.error('Utilisateur non connecté.');
-          window.location.href = 'login.html'; // Rediriger vers la page de connexion
-        }
-      });
-    }
-
-    // Charger les missions (tri décroissant par titre)
-    function loadMissions(userId) {
-      const missionsRef = db.collection('users').doc(userId).collection('missions');
-      missionsRef.orderBy('title', 'desc').get().then((querySnapshot) => {
-        missionsList.innerHTML = ''; // Vider la liste
-        const missionsArray = [];
-
-        querySnapshot.forEach((doc) => {
-          missionsArray.push({ id: doc.id, ...doc.data() });
-        });
-
-        // Afficher les missions
-        missionsArray.forEach((mission) => {
-          const missionDiv = document.createElement('div');
-          missionDiv.className = 'mission-item';
-          missionDiv.innerHTML = `
-            <h4>${mission.title || 'Mission sans titre'}</h4>
-            <p>${mission.description || ''}</p>
-            ${mission.imageUrl ? `<img src="${mission.imageUrl}" alt="Aperçu" style="max-width: 200px;">` : ''}
-            <small>ID: ${mission.id}</small>
-          `;
-          missionsList.appendChild(missionDiv);
-        });
-
-        // Mettre à jour le compteur
-        missionsCountSpan.textContent = `${missionsArray.length} mission(s)`;
-      }).catch((error) => {
-        console.error('Erreur lors du chargement des missions :', error);
-        missionsList.innerHTML = '<p>Erreur de chargement des missions.</p>';
-      });
-    }
-
-    // Charger les médailles
-    function loadMedals(userId) {
-      const medalsRef = db.collection('users').doc(userId).collection('medals');
-      medalsRef.get().then((querySnapshot) => {
-        medalsList.innerHTML = ''; // Vider la liste
-        querySnapshot.forEach((doc) => {
-          const medal = doc.data();
-          const medalDiv = document.createElement('div');
-          medalDiv.className = 'medal-item';
-          medalDiv.innerHTML = `
-            <h4>${medal.name || 'Médaille sans nom'}</h4>
-            <p>Date: ${medal.date || ''}</p>
-            <p>${medal.description || ''}</p>
-            ${medal.imageUrl ? `<img src="${medal.imageUrl}" alt="Médaille" style="max-width: 100px;">` : ''}
-          `;
-          medalsList.appendChild(medalDiv);
-        });
-      }).catch((error) => {
-        console.error('Erreur lors du chargement des médailles :', error);
-        medalsList.innerHTML = '<p>Erreur de chargement des médailles.</p>';
-      });
-    }
-
-    // Enregistrer les données utilisateur
-    function saveUserData() {
-      auth.onAuthStateChanged((user) => {
-        if (user) {
-          const userId = user.uid;
-          const userRef = db.collection('users').doc(userId);
-          const updatedData = {
-            race: raceInput.value.trim(),
-            age: ageInput.value.trim(),
-            origin: originInput.value.trim(),
-            role: roleInput.value.trim(),
-            miscInfo: miscInfoInput.value.trim()
-          };
-
-          saveButton.disabled = true;
-          userRef.set(updatedData, { merge: true }).then(() => {
-            alert('Données enregistrées avec succès !');
-            saveButton.disabled = false;
-          }).catch((error) => {
-            console.error('Erreur lors de l\'enregistrement :', error);
-            alert('Erreur lors de l\'enregistrement.');
-            saveButton.disabled = false;
-          });
-        } else {
-          alert('Vous devez être connecté pour enregistrer.');
-        }
-      });
-    }
-
-    // Ajouter une médaille
-    function addMedal() {
-      const name = document.getElementById('medal-name').value.trim();
-      const date = document.getElementById('medal-date').value;
-      const description = document.getElementById('medal-description').value.trim();
-      const image = document.getElementById('medal-image').files[0];
-
-      if (!name || !date) {
-        alert('Nom et date de la médaille requis.');
+    onAuthStateChanged(auth, user => {
+      if (!user) {
+        console.log('Utilisateur non connecté, redirection vers login.html');
+        window.location.href = 'login.html';
         return;
       }
-
-      auth.onAuthStateChanged((user) => {
-        if (user) {
-          const userId = user.uid;
-          const medalsRef = db.collection('users').doc(userId).collection('medals').doc();
-          const medalData = { name, date, description };
-
-          // Gérer l'upload d'image si présente
-          if (image) {
-            // À implémenter : upload vers Firebase Storage et récupérer imageUrl
-            // Exemple : storageRef.put(image).then(() => ...)
-            console.log('Upload image non implémenté. Ajoutez Firebase Storage.');
-          }
-
-          medalsRef.set(medalData).then(() => {
-            document.getElementById('medal-modal').style.display = 'none';
-            document.getElementById('medal-name').value = '';
-            document.getElementById('medal-date').value = '';
-            document.getElementById('medal-description').value = '';
-            document.getElementById('medal-image').value = '';
-            loadMedals(userId); // Recharger les médailles
-          }).catch((error) => {
-            console.error('Erreur lors de l\'ajout de la médaille :', error);
-            alert('Erreur lors de l\'ajout de la médaille.');
-          });
-        }
-      });
-    }
-
-    // Déconnexion
-    logoutLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      auth.signOut().then(() => {
-        window.location.href = 'login.html';
+      user.getIdTokenResult().then(idTokenResult => {
+        const isAdmin = idTokenResult.claims.isAdmin || false;
+        localStorage.setItem('isAdmin', isAdmin.toString());
+        initializePage();
+      }).catch(error => {
+        console.error('Erreur lors de la récupération du token :', error);
       });
     });
 
-    // Charger les données au démarrage
-    loadUserData();
+    document.getElementById('logout').addEventListener('click', () => {
+      signOut(auth).then(() => {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('isAdmin');
+        window.location.href = 'index.html';
+      }).catch(error => {
+        console.error('Erreur lors de la déconnexion :', error);
+      });
+    });
 
-    // Écouter le bouton Enregistrer
-    saveButton.addEventListener('click', saveUserData);
+    async function initializePage() {
+      console.log('Initialisation de la page détails...');
+      const isAdmin = localStorage.getItem('isAdmin') === 'true';
+      const urlParams = new URLSearchParams(window.location.search);
+      const memberId = urlParams.get('id');
+
+      if (!memberId) {
+        console.error('Aucun ID de membre fourni');
+        window.location.href = 'members-hr.html';
+        return;
+      }
+
+      const adminSection = document.getElementById('adminSection');
+      const saveDetails = document.getElementById('saveDetails');
+      const medalGrid = document.getElementById('medalGrid');
+      const addDecoration = document.getElementById('addDecoration');
+      const addMedalModal = document.getElementById('addMedalModal');
+      const medalDetailsModal = document.getElementById('medalDetailsModal');
+      const submitMedal = document.getElementById('submitMedal');
+
+      if (!adminSection || !saveDetails || !medalGrid || !addDecoration || !addMedalModal || !medalDetailsModal || !submitMedal) {
+        console.error('Erreur : un ou plusieurs éléments DOM manquants');
+        return;
+      }
+
+      if (!isAdmin) {
+        adminSection.style.display = 'none';
+        saveDetails.style.display = 'none';
+      }
+
+      const memberName = document.getElementById('memberName');
+      const memberVideo = document.getElementById('memberVideo');
+      const videoError = document.getElementById('videoError');
+      const race = document.getElementById('race');
+      const age = document.getElementById('age');
+      const origin = document.getElementById('origin');
+      const role = document.getElementById('role');
+      const missionCount = document.getElementById('missionCount');
+      const missionCountBar = document.getElementById('missionCountBar');
+      const miscInfo = document.getElementById('miscInfo');
+      const medalName = document.getElementById('medalName');
+      const medalDate = document.getElementById('medalDate');
+      const medalDescription = document.getElementById('medalDescription');
+      const medalImage = document.getElementById('medalImage');
+      const detailMedalName = document.getElementById('detailMedalName');
+      const detailMedalDate = document.getElementById('detailMedalDate');
+      const detailMedalDescription = document.getElementById('detailMedalDescription');
+      const detailMedalImage = document.getElementById('detailMedalImage');
+
+      if (!memberName || !memberVideo || !videoError || !race || !age || !origin || !role || !missionCount || !missionCountBar || !miscInfo || !medalName || !medalDate || !medalDescription || !medalImage || !detailMedalName || !detailMedalDate || !detailMedalDescription || !detailMedalImage) {
+        console.error('Erreur : un ou plusieurs éléments DOM manquants');
+        return;
+      }
+
+      // Modal handling
+      const closeButtons = document.querySelectorAll('.close');
+      closeButtons.forEach(button => {
+        button.addEventListener('click', () => {
+          addMedalModal.style.display = 'none';
+          medalDetailsModal.style.display = 'none';
+        });
+      });
+
+      window.addEventListener('click', event => {
+        if (event.target === addMedalModal) {
+          addMedalModal.style.display = 'none';
+        }
+        if (event.target === medalDetailsModal) {
+          medalDetailsModal.style.display = 'none';
+        }
+      });
+
+      async function loadMember() {
+        console.log('Chargement du membre depuis Firestore :', memberId);
+        try {
+          const memberDoc = await getDoc(doc(db, 'members', memberId));
+          if (memberDoc.exists()) {
+            const member = memberDoc.data();
+            console.log('Membre chargé :', member);
+            memberName.textContent = member.name || 'Inconnu';
+
+            // Vérifier et charger la vidéo
+            if (member.video && member.video !== '' && member.video !== 'fiche_RH/""' && member.video.endsWith('.mp4')) {
+              console.log('Chargement de la vidéo :', member.video);
+              memberVideo.querySelector('source').src = member.video;
+              memberVideo.load();
+              videoError.classList.add('hidden');
+            } else {
+              console.error('Champ vidéo vide ou invalide pour le membre :', memberId, 'Video:', member.video);
+              memberVideo.querySelector('source').src = '';
+              videoError.textContent = `Erreur : Vidéo non disponible pour ${member.name || 'ce membre'}. Vérifiez le chemin dans Firestore.`;
+              videoError.classList.remove('hidden');
+            }
+
+            race.value = member.race || '';
+            age.value = member.age || '';
+            origin.value = member.origin || '';
+            role.value = member.role || '';
+            missionCount.textContent = member.missionCount || 0;
+            missionCountBar.style.width = `${Math.min((member.missionCount || 0) * 10, 100)}%`;
+
+            miscInfo.value = member.miscInfo || '';
+
+            medalGrid.innerHTML = '';
+            const decorations = member.decorations || [];
+            if (decorations.length === 0) {
+              console.log('Aucune décoration pour ce membre');
+              medalGrid.innerHTML = '<p class="text-gray-400 text-center">Aucune médaille disponible.</p>';
+            } else {
+              decorations.forEach((decoration, index) => {
+                const medalDiv = document.createElement('div');
+                medalDiv.className = 'medal-item';
+                medalDiv.innerHTML = `
+                  <img src="${decoration.image || 'images/placeholder.png'}" alt="${decoration.name || 'Médaille'}" data-index="${index}">
+                  <p>${decoration.name || 'Sans nom'}</p>
+                `;
+                medalGrid.appendChild(medalDiv);
+
+                medalDiv.querySelector('img').addEventListener('click', () => {
+                  detailMedalName.textContent = decoration.name || 'Sans nom';
+                  detailMedalDate.textContent = decoration.date || 'Inconnue';
+                  detailMedalDescription.textContent = decoration.description || 'Aucune description';
+                  detailMedalImage.src = decoration.image || 'images/placeholder.png';
+                  medalDetailsModal.style.display = 'flex';
+                });
+              });
+            }
+          } else {
+            console.error('Membre non trouvé :', memberId);
+            window.location.href = 'members-hr.html';
+          }
+        } catch (error) {
+          console.error('Erreur lors du chargement du membre :', error);
+          videoError.textContent = 'Erreur lors du chargement du membre. Vérifiez la console.';
+          videoError.classList.remove('hidden');
+        }
+      }
+
+      if (isAdmin) {
+        saveDetails.addEventListener('click', async () => {
+          try {
+            await updateDoc(doc(db, 'members', memberId), {
+              race: race.value.trim(),
+              age: age.value.trim(),
+              origin: origin.value.trim(),
+              role: role.value.trim(),
+              miscInfo: miscInfo.value.trim()
+            });
+            console.log('Détails du membre enregistrés :', memberId);
+            alert('Détails enregistrés.');
+          } catch (error) {
+            console.error('Erreur lors de l\'enregistrement des détails :', error);
+            alert('Erreur lors de l\'enregistrement. Vérifiez la console.');
+          }
+        });
+
+        addDecoration.addEventListener('click', () => {
+          medalName.value = '';
+          medalDate.value = '';
+          medalDescription.value = '';
+          medalImage.value = '';
+          addMedalModal.style.display = 'flex';
+        });
+
+        submitMedal.addEventListener('click', async () => {
+          if (medalName.value.trim() && medalDate.value.trim() && medalDescription.value.trim() && medalImage.value.trim()) {
+            try {
+              const memberDoc = await getDoc(doc(db, 'members', memberId));
+              const member = memberDoc.data();
+              const updatedDecorations = [...(member.decorations || []), {
+                name: medalName.value.trim(),
+                date: medalDate.value.trim(),
+                description: medalDescription.value.trim(),
+                image: medalImage.value.trim()
+              }];
+              await updateDoc(doc(db, 'members', memberId), { decorations: updatedDecorations });
+              console.log('Médaille ajoutée :', medalName.value);
+              addMedalModal.style.display = 'none';
+              loadMember();
+            } catch (error) {
+              console.error('Erreur lors de l\'ajout de la médaille :', error);
+              alert('Erreur lors de l\'ajout de la médaille. Vérifiez la console.');
+            }
+          } else {
+            alert('Veuillez remplir tous les champs.');
+          }
+        });
+      }
+
+      loadMember();
+    }
   </script>
-
-  <style>
-    /* CSS minimal pour rendre la page fonctionnelle */
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #1a1a1a;
-      padding: 10px;
-    }
-    nav ul {
-      list-style: none;
-      display: flex;
-      gap: 20px;
-      margin: 0;
-      padding: 0;
-    }
-    nav a {
-      color: white;
-      text-decoration: none;
-    }
-    .member-details {
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 20px;
-    }
-    .member-content {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    .video-container, .member-info, .medals-section, .missions-section {
-      border: 1px solid #ccc;
-      padding: 15px;
-      border-radius: 5px;
-    }
-    .member-info label {
-      display: block;
-      margin: 10px 0 5px;
-    }
-    .member-info input, .member-info textarea {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-    }
-    .member-info button {
-      background: #007bff;
-      color: white;
-      padding: 10px;
-      border: none;
-      cursor: pointer;
-    }
-    .mission-item, .medal-item {
-      border-bottom: 1px solid #eee;
-      padding: 10px 0;
-    }
-    .modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 5px;
-      max-width: 500px;
-      width: 100%;
-    }
-    .modal-content .close {
-      float: right;
-      cursor: pointer;
-    }
-    footer {
-      text-align: center;
-      padding: 20px;
-      background: #1a1a1a;
-      color: white;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-    }
-  </style>
 </body>
 </html>
