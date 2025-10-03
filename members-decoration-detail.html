@@ -42,24 +42,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< HEAD
-  <title>NOX VENATIR - Détails Décoration</title>
-  <link href="output.css" rel="stylesheet">
-=======
-  <title>NOX VENATIR - Détails décoration</title>
+  <title>NOX VENATIR - Espace Membre</title>
+  <!-- Load Orbitron font from Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Assuming Tailwind CSS is included -->
   <script src="https://cdn.tailwindcss.com"></script>
->>>>>>> 1595cb0a14c7c75a674a40cfe8ed7b2bd92251de
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
-  <script src="firebase-config.js"></script>
   <style>
-      #decorationImage {
-      width: 300px; /* Increase size to make the medal appear larger */
+    #decorationImage {
+      width: 600px; /* Significantly increased size to make the medal appear larger */
       height: auto; /* Maintain aspect ratio */
       max-width: 100%; /* Prevent overflow within container */
       object-fit: contain; /* Ensure the entire image is visible without distortion */
+      display: block; /* Ensure proper centering */
+      margin: 0 auto; /* Center the image horizontally */
     }
     body { font-family: 'Orbitron', sans-serif; }
     .bg-members { background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('images/banner.gif'); background-size: cover; background-position: center; }
@@ -67,7 +62,7 @@
 </head>
 <body class="bg-black text-white">
   <!-- Navigation -->
-  <nav class="bg-gray-900/95 backdrop-blur-md text-white p-4 sticky top-0 z-20 border-b border-red-600/50">
+  <nav class="bg-gray-900/95 backdrop-blur-md text-white p-4 sticky top-0 z-20 border-b border-red-600/50" role="navigation">
     <div class="container mx-auto flex justify-between items-center">
       <h1 class="text-2xl font-bold text-red-600">NOX VENATIR - Espace Membre</h1>
       <ul class="flex space-x-6">
@@ -76,21 +71,22 @@
         <li><a href="members-hr.html" class="hover:text-red-500 transition">Fiche RH</a></li>
         <li><a href="members-missions.html" class="hover:text-red-500 transition">Missions</a></li>
         <li><a href="members-tactics.html" class="hover:text-red-500 transition">Tactique NOX</a></li>
-        <li><button id="logout" class="bg-red-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-500">Déconnexion</button></li>
+        <li><button id="logout" type="button" class="bg-red-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-500">Déconnexion</button></li>
       </ul>
     </div>
   </nav>
 
-    <!-- Decoration Details Section -->
+  <!-- Decoration Details Section -->
+  <main>
     <section class="bg-members py-20">
       <div class="container mx-auto">
         <h2 class="text-4xl font-bold text-center mb-12 text-white">Détails de la Décoration</h2>
         <div class="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg">
           <div class="flex flex-col md:flex-row">
             <div class="mb-8 md:mb-0"> <!-- Removed md:w-full to avoid any container width constraints -->
-              <img id="decorationImage" src="" alt="Décoration" class="rounded-lg">
+              <img id="decorationImage" src="images/medal-placeholder.png" alt="Décoration" class="rounded-lg">
             </div>
-            <div class="mb-8 md:mb-0">
+            <div class="md:w-1/2 md:pl-8">
               <h3 class="text-2xl font-semibold text-red-600 mb-4" id="decorationName">Nom de la Décoration</h3>
               <p class="text-gray-300">Détails de la décoration à venir.</p>
             </div>
@@ -100,12 +96,8 @@
     </section>
   </main>
 
-
-  <!-- Footer -->
-  <footer class="bg-gray-900 text-gray-400 py-6 border-t border-red-600/50">
-    <div class="container mx-auto text-center">
-      <p>&copy; 2955 NOX VENATIR. Tous droits réservés. Hunt the stars, citizen.</p>
-    </div>
+  <footer>
+    <p>© 2955 NOX VENATIR. Tous droits réservés. Hunt the stars, citizen.</p>
   </footer>
 
   <!-- JavaScript -->
