@@ -55,6 +55,11 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js"></script>
   <script src="firebase-config.js"></script>
   <style>
+      #decorationImage {
+      width: auto; /* Remove width constraint to use original size */
+      height: auto; /* Remove height constraint to use original size */
+      object-fit: none; /* Prevent scaling or cropping */
+    }
     body { font-family: 'Orbitron', sans-serif; }
     .bg-members { background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('images/banner.gif'); background-size: cover; background-position: center; }
   </style>
@@ -75,23 +80,25 @@
     </div>
   </nav>
 
-  <!-- Decoration Details Section -->
-  <section class="bg-members py-20">
-    <div class="container mx-auto">
-      <h2 class="text-4xl font-bold text-center mb-12 text-white">Détails de la Décoration</h2>
-      <div class="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg">
-        <div class="flex flex-col md:flex-row">
-          <div class="md:w-auto mb-full md:mb-0">
-            <img id="decorationImage" src="" alt="Décoration" class="w-full h-full object-cover rounded-lg">
-          </div>
-          <div class="md:w-auto md:pl-full">
-            <h3 class="text-2xl font-semibold text-red-600 mb-4" id="decorationName">Nom de la Décoration</h3>
-            <p class="text-gray-300">Détails de la décoration à venir.</p>
+    <!-- Decoration Details Section -->
+    <section class="bg-members py-20">
+      <div class="container mx-auto">
+        <h2 class="text-4xl font-bold text-center mb-12 text-white">Détails de la Décoration</h2>
+        <div class="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg">
+          <div class="flex flex-col md:flex-row">
+            <div class="md:w-1/2 mb-8 md:mb-0">
+              <img id="decorationImage" src="" alt="Décoration" class="rounded-lg">
+            </div>
+            <div class="md:w-1/2 md:pl-8">
+              <h3 class="text-2xl font-semibold text-red-600 mb-4" id="decorationName">Nom de la Décoration</h3>
+              <p class="text-gray-300">Détails de la décoration à venir.</p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
+  </main>
+
 
   <!-- Footer -->
   <footer class="bg-gray-900 text-gray-400 py-6 border-t border-red-600/50">
