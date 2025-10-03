@@ -49,10 +49,10 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     #decorationImage {
-      width: 600px; /* Set large size to make the medal appear prominent */
-      height: auto; /* Maintain aspect ratio */
-      max-width: 100%; /* Prevent overflow within container */
-      object-fit: contain; /* Ensure the entire image is visible without distortion */
+      width: 600px !important; /* Increased size with !important to override conflicts */
+      height: auto !important; /* Maintain aspect ratio */
+      max-width: 100% !important; /* Prevent overflow within container */
+      object-fit: contain !important; /* Ensure entire image is visible */
       display: block; /* Ensure proper centering */
       margin: 0 auto; /* Center the image horizontally */
     }
@@ -84,17 +84,82 @@
         <div class="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg">
           <div class="flex flex-col md:flex-row">
             <div class="mb-8 md:mb-0"> <!-- No width constraints to allow full image size -->
-              <img id="decorationImage" src="images/médailles/medal.png" alt="Décoration" class="rounded-lg">
+              <img id="decorationImage" src="" alt="Décoration" class="rounded-lg">
             </div>
             <div class="md:w-1/2 md:pl-8">
               <h3 class="text-2xl font-semibold text-red-600 mb-4" id="decorationName">Nom de la Décoration</h3>
-              <p class="text-gray-300">Détails de la décoration à venir.</p>
+              <p class="text-gray-300" id="decorationDescription">Détails de la décoration à venir.</p>
             </div>
           </div>
         </div>
       </div>
     </section>
   </main>
+
+  <!-- Firebase SDKs -->
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js';
+    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
+    import { getStorage, ref, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js';
+
+    // Your Firebase configuration (replace with your actual config)
+    const firebaseConfig = {
+      apiKey: "your-api-key",
+      authDomain: "your-project.firebaseapp.com",
+      projectId: "your-project-id",
+      storageBucket: "your-project.appspot.com",
+      messagingSenderId: "123456789",
+      appId: "your-app-id"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+
+    // Function to load decoration details from Firestore
+    async function loadDecorationDetails(decorationId) {
+      try {
+        const decorationRef = doc(db, 'decorations', decorationId); // Assuming 'decorations' collection
+        const decorationSnap = await getDoc(decorationRef);
+
+        if (decorationSnap.exists()) {
+          const data = decorationSnap.data();
+          document.getElementById('decorationName').textContent = data.name || 'Nom de la Décoration';
+          document.getElementById('decorationDescription').textContent = data.description || 'Détails de la décoration à venir.';
+
+          // Load medal image from Firebase Storage
+          if (data.imagePath) {
+            const imageRef = ref(storage, `images/médailles/${data.imagePath}`); // Updated to match your directory
+            const imageUrl = await getDownloadURL(imageRef);
+            document.getElementById('decorationImage').src = imageUrl;
+          } else {
+            console.error('No imagePath found in decoration document');
+            document.getElementById('decorationImage').src = 'images/médailles/fallback-medal.png'; // Fallback image
+          }
+        } else {
+          console.error('Decoration not found');
+        }
+      } catch (error) {
+        console.error('Error loading decoration details:', error);
+        document.getElementById('decorationImage').src = 'images/médailles/fallback-medal.png'; // Fallback on error
+      }
+    }
+
+    // Load decoration on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const decorationId = urlParams.get('id') || 'default-id'; // Replace with actual ID logic
+      loadDecorationDetails(decorationId);
+    });
+  </script>
+
+  <footer>
+    <p>© 2955 NOX VENATIR. Tous droits réservés. Hunt the stars, citizen.</p>
+  </footer>
+</body>
+</html>
 
   <footer>
     <p>© 2955 NOX VENATIR. Tous droits réservés. Hunt the stars, citizen.</p>
