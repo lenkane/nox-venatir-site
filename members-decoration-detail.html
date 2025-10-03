@@ -49,7 +49,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     #decorationImage {
-      width: 600px; /* Significantly increased size to make the medal appear larger */
+      width: 600px; /* Set large size to make the medal appear prominent */
       height: auto; /* Maintain aspect ratio */
       max-width: 100%; /* Prevent overflow within container */
       object-fit: contain; /* Ensure the entire image is visible without distortion */
@@ -83,8 +83,8 @@
         <h2 class="text-4xl font-bold text-center mb-12 text-white">Détails de la Décoration</h2>
         <div class="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg">
           <div class="flex flex-col md:flex-row">
-            <div class="mb-8 md:mb-0"> <!-- Removed md:w-full to avoid any container width constraints -->
-              <img id="decorationImage" class="w-full h-128 object-contain rounded-lg mb-4" src="images/médailles/medal-placeholder.png" alt="Médaille">
+            <div class="mb-8 md:mb-0"> <!-- No width constraints to allow full image size -->
+              <img id="decorationImage" src="images/médailles/medal.png" alt="Décoration" class="rounded-lg">
             </div>
             <div class="md:w-1/2 md:pl-8">
               <h3 class="text-2xl font-semibold text-red-600 mb-4" id="decorationName">Nom de la Décoration</h3>
