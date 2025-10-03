@@ -75,7 +75,6 @@
       </ul>
     </div>
   </nav>
-
   <!-- Member Details Section -->
   <section class="py-20">
     <div class="container mx-auto">
@@ -167,25 +166,53 @@
       </div>
     </div>
   </section>
-
   <!-- Footer -->
   <footer class="bg-gray-900 text-gray-400 py-6 border-t border-red-600/50">
     <div class="container mx-auto text-center">
       <p>&copy; 2955 NOX VENATIR. Tous droits réservés. Hunt the stars, citizen.</p>
     </div>
   </footer>
-
   <!-- JavaScript -->
+  <script type="text/javascript">
+    var gk_isXlsx = false;
+    var gk_xlsxFileLookup = {};
+    var gk_fileData = {};
+    function filledCell(cell) {
+      return cell !== '' && cell != null;
+    }
+    function loadFileData(filename) {
+      if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+        try {
+          var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+          var firstSheetName = workbook.SheetNames[0];
+          var worksheet = workbook.Sheets[firstSheetName];
+          var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+          var filteredData = jsonData.filter(row => row.some(filledCell));
+          var headerRowIndex = filteredData.findIndex((row, index) =>
+            row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+          );
+          if (headerRowIndex === -1 || headerRowIndex > 25) {
+            headerRowIndex = 0;
+          }
+          var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+          csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+          return csv;
+        } catch (e) {
+          console.error(e);
+          return "";
+        }
+      }
+      return gk_fileData[filename] || "";
+    }
+  </script>
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
     import { getFirestore, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
     import { firebaseConfig } from './firebase-config.js';
-
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-
     onAuthStateChanged(auth, user => {
       if (!user) {
         console.log('Utilisateur non connecté, redirection vers login.html');
@@ -200,7 +227,6 @@
         console.error('Erreur lors de la récupération du token :', error);
       });
     });
-
     document.getElementById('logout').addEventListener('click', () => {
       signOut(auth).then(() => {
         localStorage.removeItem('isLoggedIn');
@@ -210,19 +236,16 @@
         console.error('Erreur lors de la déconnexion :', error);
       });
     });
-
     async function initializePage() {
       console.log('Initialisation de la page détails...');
       const isAdmin = localStorage.getItem('isAdmin') === 'true';
       const urlParams = new URLSearchParams(window.location.search);
       const memberId = urlParams.get('id');
-
       if (!memberId) {
         console.error('Aucun ID de membre fourni');
         window.location.href = 'members-hr.html';
         return;
       }
-
       const adminSection = document.getElementById('adminSection');
       const saveDetails = document.getElementById('saveDetails');
       const medalGrid = document.getElementById('medalGrid');
@@ -230,17 +253,13 @@
       const addMedalModal = document.getElementById('addMedalModal');
       const medalDetailsModal = document.getElementById('medalDetailsModal');
       const submitMedal = document.getElementById('submitMedal');
-
       if (!adminSection || !saveDetails || !medalGrid || !addDecoration || !addMedalModal || !medalDetailsModal || !submitMedal) {
         console.error('Erreur : un ou plusieurs éléments DOM manquants');
         return;
       }
-
       if (!isAdmin) {
         adminSection.style.display = 'none';
-        saveDetails.style.display = 'none';
       }
-
       const memberName = document.getElementById('memberName');
       const memberVideo = document.getElementById('memberVideo');
       const videoError = document.getElementById('videoError');
@@ -259,12 +278,10 @@
       const detailMedalDate = document.getElementById('detailMedalDate');
       const detailMedalDescription = document.getElementById('detailMedalDescription');
       const detailMedalImage = document.getElementById('detailMedalImage');
-
       if (!memberName || !memberVideo || !videoError || !race || !age || !origin || !role || !missionCount || !missionCountBar || !miscInfo || !medalName || !medalDate || !medalDescription || !medalImage || !detailMedalName || !detailMedalDate || !detailMedalDescription || !detailMedalImage) {
         console.error('Erreur : un ou plusieurs éléments DOM manquants');
         return;
       }
-
       // Modal handling
       const closeButtons = document.querySelectorAll('.close');
       closeButtons.forEach(button => {
@@ -273,7 +290,6 @@
           medalDetailsModal.style.display = 'none';
         });
       });
-
       window.addEventListener('click', event => {
         if (event.target === addMedalModal) {
           addMedalModal.style.display = 'none';
@@ -282,7 +298,6 @@
           medalDetailsModal.style.display = 'none';
         }
       });
-
       async function loadMember() {
         console.log('Chargement du membre depuis Firestore :', memberId);
         try {
@@ -291,8 +306,6 @@
             const member = memberDoc.data();
             console.log('Membre chargé :', member);
             memberName.textContent = member.name || 'Inconnu';
-
-            // Vérifier et charger la vidéo
             if (member.video && member.video !== '' && member.video !== 'fiche_RH/""' && member.video.endsWith('.mp4')) {
               console.log('Chargement de la vidéo :', member.video);
               memberVideo.querySelector('source').src = member.video;
@@ -304,16 +317,13 @@
               videoError.textContent = `Erreur : Vidéo non disponible pour ${member.name || 'ce membre'}. Vérifiez le chemin dans Firestore.`;
               videoError.classList.remove('hidden');
             }
-
             race.value = member.race || '';
             age.value = member.age || '';
             origin.value = member.origin || '';
             role.value = member.role || '';
             missionCount.textContent = member.missionCount || 0;
             missionCountBar.style.width = `${Math.min((member.missionCount || 0) * 10, 100)}%`;
-
             miscInfo.value = member.miscInfo || '';
-
             medalGrid.innerHTML = '';
             const decorations = member.decorations || [];
             if (decorations.length === 0) {
@@ -328,7 +338,6 @@
                   <p>${decoration.name || 'Sans nom'}</p>
                 `;
                 medalGrid.appendChild(medalDiv);
-
                 medalDiv.querySelector('img').addEventListener('click', () => {
                   detailMedalName.textContent = decoration.name || 'Sans nom';
                   detailMedalDate.textContent = decoration.date || 'Inconnue';
@@ -348,25 +357,24 @@
           videoError.classList.remove('hidden');
         }
       }
-
+      // Save details for all members
+      saveDetails.addEventListener('click', async () => {
+        try {
+          await updateDoc(doc(db, 'members', memberId), {
+            race: race.value.trim(),
+            age: age.value.trim(),
+            origin: origin.value.trim(),
+            role: role.value.trim(),
+            miscInfo: miscInfo.value.trim()
+          });
+          console.log('Détails du membre enregistrés :', memberId);
+          alert('Détails enregistrés.');
+        } catch (error) {
+          console.error('Erreur lors de l\'enregistrement des détails :', error);
+          alert('Erreur lors de l\'enregistrement. Vérifiez la console.');
+        }
+      });
       if (isAdmin) {
-        saveDetails.addEventListener('click', async () => {
-          try {
-            await updateDoc(doc(db, 'members', memberId), {
-              race: race.value.trim(),
-              age: age.value.trim(),
-              origin: origin.value.trim(),
-              role: role.value.trim(),
-              miscInfo: miscInfo.value.trim()
-            });
-            console.log('Détails du membre enregistrés :', memberId);
-            alert('Détails enregistrés.');
-          } catch (error) {
-            console.error('Erreur lors de l\'enregistrement des détails :', error);
-            alert('Erreur lors de l\'enregistrement. Vérifiez la console.');
-          }
-        });
-
         addDecoration.addEventListener('click', () => {
           medalName.value = '';
           medalDate.value = '';
@@ -374,7 +382,6 @@
           medalImage.value = '';
           addMedalModal.style.display = 'flex';
         });
-
         submitMedal.addEventListener('click', async () => {
           if (medalName.value.trim() && medalDate.value.trim() && medalDescription.value.trim() && medalImage.value.trim()) {
             try {
@@ -399,7 +406,6 @@
           }
         });
       }
-
       loadMember();
     }
   </script>
