@@ -44,19 +44,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NOX VENATIR - Espace Membre</title>
   <!-- Load Orbitron font from Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     #decorationImage {
-      width: 600px !important; /* Large size to ensure prominence */
+      width: 600px !important; /* Large size for prominence */
       height: auto !important; /* Maintain aspect ratio */
       max-width: 100% !important; /* Prevent overflow */
       object-fit: contain !important; /* Show entire image */
       display: block; /* Center properly */
       margin: 0 auto; /* Center horizontally */
     }
-    body { font-family: 'Orbitron', sans-serif; }
+    body { font-family: 'Orbitron', sans-serif; background: black; }
     .bg-members { background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('images/banner.gif'); background-size: cover; background-position: center; }
   </style>
 </head>
@@ -89,6 +89,7 @@
             <div class="md:w-1/2 md:pl-8">
               <h3 class="text-2xl font-semibold text-red-600 mb-4" id="decorationName">Nom de la Décoration</h3>
               <p class="text-gray-300" id="decorationDescription">Détails de la décoration à venir.</p>
+              <p class="text-gray-300" id="decorationDate">Date : Inconnue</p>
             </div>
           </div>
         </div>
@@ -98,43 +99,61 @@
 
   <!-- Firebase SDKs -->
   <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js';
-    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js';
-    import { getStorage, ref, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.13.1/firebase-storage.js';
-
-    const firebaseConfig = {
-      apiKey: "your-api-key",
-      authDomain: "your-project.firebaseapp.com",
-      projectId: "your-project-id",
-      storageBucket: "your-project.appspot.com",
-      messagingSenderId: "123456789",
-      appId: "your-app-id"
-    };
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+    import { getStorage, ref, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
+    import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+    import { firebaseConfig } from './firebase-config.js';
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const storage = getStorage(app);
+    const auth = getAuth(app);
 
-    async function loadDecorationDetails(decorationId) {
+    onAuthStateChanged(auth, user => {
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+      loadDecorationDetails();
+    });
+
+    async function loadDecorationDetails() {
       try {
-        const decorationRef = doc(db, 'decorations', decorationId);
-        const decorationSnap = await getDoc(decorationRef);
+        const urlParams = new URLSearchParams(window.location.search);
+        const memberId = urlParams.get('memberId');
+        const decorationIndex = parseInt(urlParams.get('decorationIndex'), 10);
 
-        if (decorationSnap.exists()) {
-          const data = decorationSnap.data();
-          document.getElementById('decorationName').textContent = data.name || 'Nom de la Décoration';
-          document.getElementById('decorationDescription').textContent = data.description || 'Détails de la décoration à venir.';
+        if (!memberId || isNaN(decorationIndex)) {
+          console.error('Missing memberId or decorationIndex');
+          return;
+        }
 
-          if (data.imagePath) {
-            const imageRef = ref(storage, `images/médailles/${data.imagePath}`);
-            const imageUrl = await getDownloadURL(imageRef);
-            document.getElementById('decorationImage').src = imageUrl;
+        const memberRef = doc(db, 'members', memberId);
+        const memberSnap = await getDoc(memberRef);
+
+        if (memberSnap.exists()) {
+          const member = memberSnap.data();
+          const decoration = member.decorations?.[decorationIndex];
+
+          if (decoration) {
+            document.getElementById('decorationName').textContent = decoration.name || 'Nom de la Décoration';
+            document.getElementById('decorationDescription').textContent = decoration.description || 'Détails de la décoration à venir.';
+            document.getElementById('decorationDate').textContent = `Date : ${decoration.date || 'Inconnue'}`;
+
+            if (decoration.image) {
+              const imageRef = ref(storage, decoration.image);
+              const imageUrl = await getDownloadURL(imageRef);
+              document.getElementById('decorationImage').src = imageUrl;
+            } else {
+              console.error('No image path found for decoration');
+              document.getElementById('decorationImage').src = 'images/médailles/fallback-medal.png';
+            }
           } else {
-            console.error('No imagePath found');
-            document.getElementById('decorationImage').src = 'images/médailles/fallback-medal.png';
+            console.error('Decoration not found at index:', decorationIndex);
           }
         } else {
-          console.error('Decoration not found');
+          console.error('Member not found:', memberId);
         }
       } catch (error) {
         console.error('Error loading decoration:', error);
@@ -142,54 +161,21 @@
       }
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const decorationId = urlParams.get('id') || 'default-id';
-      loadDecorationDetails(decorationId);
+    document.getElementById('logout').addEventListener('click', () => {
+      signOut(auth).then(() => {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('isAdmin');
+        window.location.href = 'index.html';
+      }).catch(error => {
+        console.error('Error signing out:', error);
+      });
     });
   </script>
 
-  <footer>
-    <p>© 2955 NOX VENATIR. Tous droits réservés. Hunt the stars, citizen.</p>
+  <footer class="bg-gray-900 text-gray-400 py-6 border-t border-red-600/50">
+    <div class="container mx-auto text-center">
+      <p>&copy; 2955 NOX VENATIR. Tous droits réservés. Hunt the stars, citizen.</p>
+    </div>
   </footer>
 </body>
 </html>
-
-  <!-- JavaScript -->
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
-    import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
-    import { firebaseConfig } from './firebase-config.js';
-
-<<<<<<< HEAD
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app
-=======
-    // Logout
-    document.getElementById('logout').addEventListener('click', function() {
-      localStorage.removeItem('isLoggedIn');
-      localStorage.removeItem('isAdmin');
-      window.location.href = 'index.html';
-    });
-
-    // Get member ID and decoration ID from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const memberId = urlParams.get('memberId');
-    const decorationId = urlParams.get('decorationId');
-
-    // Load members from localStorage
-    let members = JSON.parse(localStorage.getItem('noxMembers')) || [];
-
-    if (memberId && decorationId && members[memberId] && members[memberId].decorations[decorationId]) {
-      const decoration = members[memberId].decorations[decorationId];
-      document.getElementById('decorationImg').src = decoration.img;
-      document.getElementById('decorationName').textContent = decoration.name;
-      document.getElementById('decorationDesc').textContent = decoration.desc || 'Aucune description disponible.';
-      document.querySelector('a[href*="members-hr-detail.html"]').href = `members-hr-detail.html?id=${memberId}`;
-    } else {
-      window.location.href = 'members-hr.html';
-    }
-  </script>
-</body>
-</html>
->>>>>>> 1595cb0a14c7c75a674a40cfe8ed7b2bd92251de
