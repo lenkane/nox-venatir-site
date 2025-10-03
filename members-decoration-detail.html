@@ -45,16 +45,16 @@
   <title>NOX VENATIR - Espace Membre</title>
   <!-- Load Orbitron font from Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-  <!-- Assuming Tailwind CSS is included -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     #decorationImage {
-      width: 600px !important; /* Increased size with !important to override conflicts */
+      width: 600px !important; /* Large size to ensure prominence */
       height: auto !important; /* Maintain aspect ratio */
-      max-width: 100% !important; /* Prevent overflow within container */
-      object-fit: contain !important; /* Ensure entire image is visible */
-      display: block; /* Ensure proper centering */
-      margin: 0 auto; /* Center the image horizontally */
+      max-width: 100% !important; /* Prevent overflow */
+      object-fit: contain !important; /* Show entire image */
+      display: block; /* Center properly */
+      margin: 0 auto; /* Center horizontally */
     }
     body { font-family: 'Orbitron', sans-serif; }
     .bg-members { background: linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.8)), url('images/banner.gif'); background-size: cover; background-position: center; }
@@ -83,7 +83,7 @@
         <h2 class="text-4xl font-bold text-center mb-12 text-white">Détails de la Décoration</h2>
         <div class="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg">
           <div class="flex flex-col md:flex-row">
-            <div class="mb-8 md:mb-0"> <!-- No width constraints to allow full image size -->
+            <div class="mb-8 md:mb-0">
               <img id="decorationImage" src="" alt="Décoration" class="rounded-lg">
             </div>
             <div class="md:w-1/2 md:pl-8">
