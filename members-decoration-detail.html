@@ -48,8 +48,8 @@
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    #decorationImage {
-      width: 600px !important; /* Large size to ensure prominence */
+    .medal-image {
+      width: 600px !important; /* Large size for medals */
       height: auto !important; /* Maintain aspect ratio */
       max-width: 100% !important; /* Prevent overflow */
       object-fit: contain !important; /* Show entire image */
@@ -76,24 +76,72 @@
     </div>
   </nav>
 
-  <!-- Decoration Details Section -->
+  <!-- Member Details Section -->
   <main>
     <section class="bg-members py-20">
       <div class="container mx-auto">
-        <h2 class="text-4xl font-bold text-center mb-12 text-white">Détails de la Décoration</h2>
+        <h2 class="text-4xl font-bold text-center mb-12 text-white">Détails Membre</h2>
         <div class="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg">
           <div class="flex flex-col md:flex-row">
-            <div class="mb-8 md:mb-0">
-              <img id="decorationImage" src="" alt="Décoration" class="rounded-lg">
+            <div class="md:w-1/2 mb-8 md:mb-0">
+              <div class="relative" id="videoContainer">
+                <p class="text-red-600">Erreur : Vidéo non disponible. Vérifiez le chemin dans Firestore.</p>
+              </div>
             </div>
             <div class="md:w-1/2 md:pl-8">
-              <h3 class="text-2xl font-semibold text-red-600 mb-4" id="decorationName">Nom de la Décoration</h3>
-              <p class="text-gray-300" id="decorationDescription">Détails de la décoration à venir.</p>
+              <p><strong>Race</strong> <span id="memberRace"></span></p>
+              <p><strong>Âge</strong> <span id="memberAge"></span></p>
+              <p><strong>Origine</strong> <span id="memberOrigin"></span></p>
+              <p><strong>Rôle</strong> <span id="memberRole"></span></p>
+              <p><strong>Nombre de missions</strong> <span id="memberMissions">0 mission(s)</span></p>
+              <p><strong>Informations diverses</strong> <span id="memberInfo"></span></p>
+              <button id="saveMember" class="bg-red-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-500 mt-4">Enregistrer</button>
             </div>
+          </div>
+        </div>
+
+        <!-- Add Medal Form -->
+        <div class="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg mt-8">
+          <h3 class="text-2xl font-semibold text-red-600 mb-4">Ajouter une Décoration</h3>
+          <button id="openMedalModal" class="bg-red-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-500">Ajouter une Médaille</button>
+        </div>
+
+        <!-- Medals Section -->
+        <div class="max-w-4xl mx-auto bg-gray-800 p-8 rounded-lg mt-8">
+          <h3 class="text-2xl font-semibold text-red-600 mb-4">Médailles</h3>
+          <div id="medalsList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Medals will be populated here -->
           </div>
         </div>
       </div>
     </section>
+
+    <!-- Modal for Adding Medal -->
+    <div id="medalModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+      <div class="bg-gray-800 p-8 rounded-lg w-full max-w-md">
+        <h3 class="text-2xl font-semibold text-red-600 mb-4">Ajouter une Médaille</h3>
+        <form id="addMedalForm">
+          <div class="mb-4">
+            <label for="medalName" class="block text-gray-300">Nom de la médaille</label>
+            <input type="text" id="medalName" class="w-full bg-gray-700 text-white p-2 rounded">
+          </div>
+          <div class="mb-4">
+            <label for="medalDate" class="block text-gray-300">Date d'obtention</label>
+            <input type="date" id="medalDate" class="w-full bg-gray-700 text-white p-2 rounded">
+          </div>
+          <div class="mb-4">
+            <label for="medalDescription" class="block text-gray-300">Description</label>
+            <textarea id="medalDescription" class="w-full bg-gray-700 text-white p-2 rounded"></textarea>
+          </div>
+          <div class="mb-4">
+            <label for="medalImage" class="block text-gray-300">Image de la médaille</label>
+            <input type="file" id="medalImage" accept="image/*" class="w-full bg-gray-700 text-white p-2 rounded">
+          </div>
+          <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-full font-semibold hover:bg-red-500">Ajouter</button>
+        </form>
+        <button id="closeMedalModal" class="mt-4 text-gray-300 hover:text-red-500">Fermer</button>
+      </div>
+    </div>
   </main>
 
   <!-- Firebase SDKs -->
