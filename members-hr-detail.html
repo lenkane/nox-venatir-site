@@ -289,8 +289,11 @@
             age.value = member.age || '';
             origin.value = member.origin || '';
             role.value = member.role || '';
-            missionCount.textContent = member.missionCount || 0;
-            missionCountBar.style.width = `${Math.min((member.missionCount || 0) * 100, 100)}%`;
+                const missionsQuery = query(collection(db, 'missions'), where('participants', 'array-contains', memberId));
+                const querySnap = await getDocs(missionsQuery);
+                const count = querySnap.size;
+                missionCount.textContent = `${count} mission(s)`;
+                missionCountBar.style.width = `${Math.min(count * 10, 100)}%`;
             miscInfo.value = member.miscInfo || '';
             medalGrid.innerHTML = '';
             const decorations = member.decorations || [];
