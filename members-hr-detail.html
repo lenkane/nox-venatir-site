@@ -109,8 +109,12 @@
               <label class="block text-gray-300 font-semibold mb-2">Nombre de missions</label>
               <div class="progress-bar w-full h-4">
                 <div id="missionCountBar" class="progress-bar-fill" style="width: 0%"></div>
-              </div>
-              <p class="text-gray-400 text-sm mt-1"><span id="missionCount">0</span> mission(s)</p>
+           <div class="detail-item">
+                 <span class="detail-label">Nombre de missions</span>
+                  <span class="detail-value">
+                    <span id="missionCountDisplay">Chargement...</span> mission(s)
+                  </span>
+                </div>
             </div>
             <div class="mb-4">
               <label class="block text-gray-300 font-semibold mb-2">Informations diverses</label>
@@ -290,7 +294,7 @@
             origin.value = member.origin || '';
             role.value = member.role || '';
             missionCount.textContent = member.missionCount || 0;
-            missionCountBar.style.width = `${Math.min((member.missionCount || 0) * 10, 100)}%`;
+            missionCountBar.style.width = `${Math.min((member.missionCount || 0) * 20, 100)}%`;
             miscInfo.value = member.miscInfo || '';
             medalGrid.innerHTML = '';
             const decorations = member.decorations || [];
