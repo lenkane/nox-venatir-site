@@ -284,7 +284,7 @@
             const querySnap = await getDocs(missionsQuery);
             const count = querySnap.size;
             missionCount.textContent = `${count} mission(s)`;
-            missionCountBar.style.width = `${Math.min(count * 10, 100)}%`;
+            missionCountBar.style.width = `${Math.min(count * 2, 100)}%`;
             miscInfo.value = member.miscInfo || '';
             medalGrid.innerHTML = '';
             const decorations = member.decorations || [];
