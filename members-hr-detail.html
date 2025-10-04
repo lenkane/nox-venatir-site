@@ -110,7 +110,7 @@
               <div class="progress-bar w-full h-4">
                 <div id="missionCountBar" class="progress-bar-fill" style="width: 0%"></div>
               </div>
-              <p class="text-gray-400 text-sm mt-1"><span id="missionCount">0</span> mission(s)</p>
+              <p class="text-gray-400 text-sm mt-1"><span id="missionCount">Chargement...</span></p>
             </div>
             <div class="mb-4">
               <label class="block text-gray-300 font-semibold mb-2">Informations diverses</label>
@@ -171,13 +171,11 @@
   <script type="module">
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
     import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
-    import { getFirestore, doc, getDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+    import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
     import { firebaseConfig } from './firebase-config.js';
-
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-
     onAuthStateChanged(auth, user => {
       if (!user) {
         console.log('Utilisateur non connecté, redirection vers login.html');
@@ -192,7 +190,6 @@
         console.error('Erreur lors de la récupération du token :', error);
       });
     });
-
     document.getElementById('logout').addEventListener('click', () => {
       signOut(auth).then(() => {
         localStorage.removeItem('isLoggedIn');
@@ -202,7 +199,6 @@
         console.error('Erreur lors de la déconnexion :', error);
       });
     });
-
     async function initializePage() {
       console.log('Initialisation de la page détails...');
       const isAdmin = localStorage.getItem('isAdmin') === 'true';
@@ -213,7 +209,6 @@
         window.location.href = 'members-hr.html';
         return;
       }
-
       const adminSection = document.getElementById('adminSection');
       const saveDetails = document.getElementById('saveDetails');
       const medalGrid = document.getElementById('medalGrid');
@@ -239,16 +234,13 @@
       const detailMedalDate = document.getElementById('detailMedalDate');
       const detailMedalDescription = document.getElementById('detailMedalDescription');
       const detailMedalImage = document.getElementById('detailMedalImage');
-
       if (!adminSection || !saveDetails || !medalGrid || !addDecoration || !addMedalModal || !medalDetailsModal || !submitMedal || !memberName || !memberVideo || !videoError || !race || !age || !origin || !role || !missionCount || !missionCountBar || !miscInfo || !medalName || !medalDate || !medalDescription || !medalImage || !detailMedalName || !detailMedalDate || !detailMedalDescription || !detailMedalImage) {
         console.error('Erreur : un ou plusieurs éléments DOM manquants');
         return;
       }
-
       if (!isAdmin) {
         adminSection.style.display = 'none';
       }
-
       // Modal handling
       const closeButtons = document.querySelectorAll('.close');
       closeButtons.forEach(button => {
@@ -265,7 +257,6 @@
           medalDetailsModal.style.display = 'none';
         }
       });
-
       async function loadMember() {
         console.log('Chargement du membre depuis Firestore :', memberId);
         try {
@@ -289,11 +280,11 @@
             age.value = member.age || '';
             origin.value = member.origin || '';
             role.value = member.role || '';
-                const missionsQuery = query(collection(db, 'missions'), where('participants', 'array-contains', memberId));
-                const querySnap = await getDocs(missionsQuery);
-                const count = querySnap.size;
-                missionCount.textContent = `${count} mission(s)`;
-                missionCountBar.style.width = `${Math.min(count * 10, 100)}%`;
+            const missionsQuery = query(collection(db, 'missions'), where('participants', 'array-contains', memberId));
+            const querySnap = await getDocs(missionsQuery);
+            const count = querySnap.size;
+            missionCount.textContent = `${count} mission(s)`;
+            missionCountBar.style.width = `${Math.min(count * 10, 100)}%`;
             miscInfo.value = member.miscInfo || '';
             medalGrid.innerHTML = '';
             const decorations = member.decorations || [];
@@ -327,9 +318,10 @@
           console.error('Erreur lors du chargement du membre :', error);
           videoError.textContent = 'Erreur lors du chargement du membre. Vérifiez la console.';
           videoError.classList.remove('hidden');
+          missionCount.textContent = 'Erreur';
+          missionCountBar.style.width = '0%';
         }
       }
-
       saveDetails.addEventListener('click', async () => {
         try {
           await updateDoc(doc(db, 'members', memberId), {
@@ -346,7 +338,6 @@
           alert('Erreur lors de l\'enregistrement. Vérifiez la console.');
         }
       });
-
       if (isAdmin) {
         addDecoration.addEventListener('click', () => {
           medalName.value = '';
@@ -355,7 +346,6 @@
           medalImage.value = '';
           addMedalModal.style.display = 'flex';
         });
-
         submitMedal.addEventListener('click', async () => {
           if (medalName.value.trim() && medalDate.value.trim() && medalDescription.value.trim() && medalImage.value.trim()) {
             try {
@@ -380,7 +370,6 @@
           }
         });
       }
-
       loadMember();
     }
   </script>
