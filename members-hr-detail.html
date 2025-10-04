@@ -109,10 +109,9 @@
               <label class="block text-gray-300 font-semibold mb-2">Nombre de missions</label>
               <div class="progress-bar w-full h-4">
                 <div id="missionCountBar" class="progress-bar-fill" style="width: 0%"></div>
-              <div id="missionCountBar" class="progress-bar-fill" style="width: 0%"></div>
               </div>
               <p class="text-gray-400 text-sm mt-1"><span id="missionCount">0</span> mission(s)</p>
-           </div>
+            </div>
             <div class="mb-4">
               <label class="block text-gray-300 font-semibold mb-2">Informations diverses</label>
               <textarea id="miscInfo" class="w-full p-3 bg-gray-700 border border-red-600/50 rounded-lg text-white" rows="4" placeholder="Informations diverses"></textarea>
@@ -291,7 +290,7 @@
             origin.value = member.origin || '';
             role.value = member.role || '';
             missionCount.textContent = member.missionCount || 0;
-            missionCountBar.style.width = `${Math.min((member.missionCount || 0) * 20, 100)}%`;
+            missionCountBar.style.width = `${Math.min((member.missionCount || 0) * 100, 100)}%`;
             miscInfo.value = member.miscInfo || '';
             medalGrid.innerHTML = '';
             const decorations = member.decorations || [];
